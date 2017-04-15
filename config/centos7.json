@@ -8,6 +8,7 @@
         "yum -y install libpng-devel openssl-devel libX11-devel bzip2-devel",
         "yum -y install ncurses-devel readline-devel libXext-devel libXi-devel",
         "yum -y install libXfixes-devel libXft-devel libXmu-devel libXpm-devel",
-        "yum -y install libXrandr-devel libXt-devel freeglut-devel"
+        "yum -y install libXrandr-devel libXt-devel freeglut-devel",
+        "yum -y install file which"
     ]
 }
