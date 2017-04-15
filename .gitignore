@@ -90,4 +90,5 @@ ENV/
 
 python_env
 singularity_images/*
-*sqlite
+master
+clients

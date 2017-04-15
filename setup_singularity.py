@@ -34,8 +34,8 @@ def import_config(cfg_path):
 
 username = getpass.getuser()
 
-for cfg in os.listdir('singularity_bootstrap'):
-    cfg_path = os.path.join('singularity_bootstrap',cfg)
+for cfg in os.listdir('configs'):
+    cfg_path = os.path.join('configs',cfg)
     config = import_config(cfg_path)
     img_path = os.path.join('singularity_images',cfg.replace('json','img'))
     if not os.path.exists(img_path):
