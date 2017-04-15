@@ -18,4 +18,3 @@ if [ ! -d master ]; then
     buildbot create-master -r master
     ln -s ../master.cfg master/master.cfg
 fi
-python setup_buildbot.py
