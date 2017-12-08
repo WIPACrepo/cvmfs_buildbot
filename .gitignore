@@ -92,3 +92,6 @@ python_env
 singularity_images/*
 master
 clients
+buildcache
+cvmfs_config
+srv

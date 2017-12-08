@@ -1,0 +1,71 @@
+{
+    "apiVersion": "apps/v1beta1",
+    "kind": "Deployment",
+    "metadata": {
+        "labels": {
+            "app": "buildbot-worker"
+        },
+        "name": "worker-cvmfs-centos7"
+    },
+    "spec": {
+        "replicas": 1,
+        "selector": {
+            "matchLabels": {
+                "app": "buildbot-worker"
+            }
+        },
+        "template": {
+            "metadata": {
+                "labels": {
+                    "app": "buildbot-worker"
+                }
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "env": [
+                            {
+                                "name": "BUILDMASTER",
+                                "value": "cvmfs-buildbot-worker"
+                            },
+                            {
+                                "name": "BUILDMASTER_PORT",
+                                "value": "9989"
+                            },
+                            {
+                                "name": "WORKERNAME",
+                                "value": "cvmfs-centos7"
+                            },
+                            {
+                                "name": "WORKERPASS",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "worker_password",
+                                        "name": "cvmfs-buildbot"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "icecube-buildbot/worker-cvmfs-centos7",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "worker-cvmfs-centos7",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/cvmfs",
+                                "name": "cvmfs-buildbot-worker-shared-storage"
+                            }
+                        ]
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "cvmfs-buildbot-worker-shared-storage",
+                        "persistentVolumeClaim": {
+                            "claimName": "cvmfs-buildbot-worker-pv-claim"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

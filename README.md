@@ -1,2 +1,2 @@
-# cvmfs_buildbot
-buildbot config for IceCube cvmfs builds in containers
+# iceprod_buildbot
+Buildbot for IceProd testing

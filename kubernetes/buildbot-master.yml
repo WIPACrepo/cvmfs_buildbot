@@ -1,0 +1,62 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: cvmfs-buildbot
+spec:
+  selector:
+    matchLabels:
+      app: cvmfs-buildbot-master
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: cvmfs-buildbot-master
+        type: buildbot-master
+    spec:
+      containers:
+      - name: buildbot-master
+        image: icecube-buildbot/master-cvmfs
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: BUILDBOT_CONFIG_DIR
+          value: /var/lib/buildbot
+        - name: BUILDBOT_MASTER_URL
+          valueFrom:
+            secretKeyRef:
+              name: cvmfs-buildbot
+              key: master_url
+        - name: WORKER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cvmfs-buildbot
+              key: worker_password
+        volumeMounts:
+        - name: cvmfs-buildbot-master-config
+          mountPath: /buildbot
+        - name: cvmfs-buildbot-master-config-d
+          mountPath: /buildbot/master_cfg_d
+        - name: cvmfs-buildbot-master-persistent-storage
+          mountPath: /data
+        livenessProbe:
+          httpGet:
+            path: /
+            port: cvmfs-build
+          initialDelaySeconds: 120
+          periodSeconds: 10
+        ports:
+        - containerPort: 8010
+          name: cvmfs-build
+          protocol: TCP
+        - containerPort: 9989
+          protocol: TCP
+      volumes:
+      - name: cvmfs-buildbot-master-config
+        configMap:
+          name: cvmfs-buildbot-master-cfg
+      - name: cvmfs-buildbot-master-config-d
+        configMap:
+          name: cvmfs-buildbot-master-cfg-d
+      - name: cvmfs-buildbot-master-persistent-storage
+        persistentVolumeClaim:
+          claimName: cvmfs-buildbot-master-pv-claim
