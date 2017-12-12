@@ -95,3 +95,5 @@ clients
 buildcache
 cvmfs_config
 srv
+
+kubernetes/*secrets*.yml

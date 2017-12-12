@@ -68,6 +68,10 @@
                             {
                                 "mountPath": "/var/spool/cvmfs",
                                 "name": "cvmfs-buildbot-stratum0-tmp-storage"
+                            },
+                            {
+                                "mountPath": "/mnt/cvmfs_config",
+                                "name": "cvmfs-buildbot-stratum0-config-storage"
                             }
                         ]
                     }
@@ -88,6 +92,12 @@
                     {
                         "emptyDir": {},
                         "name": "cvmfs-buildbot-stratum0-tmp-storage"
+                    },
+                    {
+                        "name": "cvmfs-buildbot-stratum0-config-storage",
+                        "persistentVolumeClaim": {
+                            "claimName": "cvmfs-buildbot-stratum0-config-pv-claim"
+                        }
                     }
                 ]
             }
