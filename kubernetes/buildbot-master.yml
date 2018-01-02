@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: buildbot-master
-        image: icecube-buildbot/master-cvmfs
-        imagePullPolicy: IfNotPresent
+        image: localhost:5000/icecube-buildbot-master-cvmfs:0.1.17
+        imagePullPolicy: Always
         env:
         - name: BUILDBOT_CONFIG_DIR
           value: /var/lib/buildbot
@@ -39,9 +39,9 @@ spec:
         - name: cvmfs-buildbot-master-persistent-storage
           mountPath: /data
         livenessProbe:
-          httpGet:
+          httpGet: 
             path: /
-            port: cvmfs-build
+            port: 8010
           initialDelaySeconds: 120
           periodSeconds: 10
         ports:

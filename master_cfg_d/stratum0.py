@@ -75,8 +75,8 @@ def setup(cfg):
         name='rsync',
         command=[
             'cvmfs_rsync',
-            '/cvmfs-source/icecube.opensciencegrid.org/'+util.Property('variant'),
-            '/cvmfs/icecube.opensciencegrid.org/'+util.Property('variant'),
+            util.Interpolate('/cvmfs-source/icecube.opensciencegrid.org/$(prop:variant)s'),
+            util.Interpolate('/cvmfs/icecube.opensciencegrid.org/$(prop:variant)s'),
         ],
         haltOnFailure=True,
         doStepIf=BuildPassed,

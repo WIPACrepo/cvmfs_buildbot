@@ -46,7 +46,7 @@
                                 }
                             }
                         ],
-                        "image": "icecube-buildbot/worker-cvmfs-centos7-stratum0",
+                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-stratum0",
                         "imagePullPolicy": "IfNotPresent",
                         "name": "worker-cvmfs-centos7-stratum0",
                         "securityContext": {
@@ -78,10 +78,19 @@
                 ],
                 "volumes": [
                     {
-                        "name": "cvmfs-buildbot-worker-shared-storage",
-                        "persistentVolumeClaim": {
-                            "claimName": "cvmfs-buildbot-worker-pv-claim"
-                        }
+                        "cephfs": {
+                            "monitors": [
+                                "10.254.81.20:6790",
+                                "10.254.156.164:6790",
+                                "10.254.34.31:6790"
+                            ],
+                            "path": "/cvmfs",
+                            "secretRef": {
+                                "name": "rook-admin"
+                            },
+                            "user": "admin"
+                        },
+                        "name": "cvmfs-buildbot-worker-shared-storage"
                     },
                     {
                         "name": "cvmfs-buildbot-stratum0-storage",

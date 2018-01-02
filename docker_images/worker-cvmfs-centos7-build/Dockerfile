@@ -9,7 +9,7 @@ LABEL description="IceCube - CVMFS buildbot worker with devel packages running c
       gpus="0" \
       organization="icecube-buildbot" \
       name="worker-cvmfs-centos7-build" \
-      version="0.1"
+      version="0.1.2"
 
 COPY buildbot.tac /buildbot/buildbot.tac
 
@@ -26,13 +26,13 @@ RUN \
     yum clean all && \
     curl "https://bootstrap.pypa.io/get-pip.py" | python && \
     pip --no-cache-dir install dumb-init 'twisted[tls]' buildbot-worker && \
-    mkdir /cvmfs && \
+    mkdir /cvmfs && mkdir -p /usr/share/buildbot && \
+    echo -e "#!/bin/sh\ntwistd -ny buildbot.tac" > /usr/share/buildbot/run.sh && \
+    chmod +x /usr/share/buildbot/run.sh && \
     useradd -ms /bin/bash buildbot && chown -R buildbot /buildbot
-
-USER buildbot
 
 WORKDIR /buildbot
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
-CMD ["twistd", "-ny", "buildbot.tac"]
+CMD ["bash","-c","chown -R buildbot /cvmfs; runuser buildbot /usr/share/buildbot/run.sh"]

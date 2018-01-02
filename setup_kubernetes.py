@@ -67,7 +67,7 @@ def make_master_cfg():
             'data': config,
         }, f, sort_keys=True, indent=4, separators=(',',': '))
 
-def make_docker(name):
+def make_docker(name, push=False):
     # get current version
     version = None
     docker_path = os.path.join('docker_images',name)
@@ -88,17 +88,27 @@ def make_docker(name):
                 versions.add(l.split()[-1])
     if (version and version not in versions) or ((not version) and not versions):
         # build docker image
-        shutil.copy2('worker_buildbot.tac',
-                     os.path.join(docker_path,'buildbot.tac'))
+        if 'worker' in name:
+            shutil.copy2('worker_buildbot.tac',
+                         os.path.join(docker_path,'buildbot.tac'))
+        elif 'master' in name:
+            shutil.copy2('master_buildbot.tac',
+                         os.path.join(docker_path,'buildbot.tac'))
         build_cmd = ['docker','build','--force-rm']
+        push_cmd = []
         if version:
-            build_cmd += ['-t','icecube-buildbot/'+name+':'+version,
-                          '-t','icecube-buildbot/'+name+':latest']
+            build_cmd += ['-t','localhost:5000/icecube-buildbot-'+name+':'+version,
+                          '-t','localhost:5000/icecube-buildbot-'+name+':latest']
+            push_cmd += ['localhost:5000/icecube-buildbot-'+name+':'+version,
+                          'localhost:5000/icecube-buildbot-'+name+':latest']
         else:
-            build_cmd += ['-t','icecube-buildbot/'+name+':latest']
+            build_cmd += ['-t','localhost:5000/icecube-buildbot-'+name+':latest']
+            push_cmd += ['localhost:5000/icecube-buildbot-'+name+':latest']
         build_cmd += ['.']
         try:
             subprocess.check_call(build_cmd, cwd=docker_path)
+            for img in push_cmd:
+                subprocess.check_call(['docker','push',img], cwd=docker_path)
         except Exception,KeyboardInterrupt:
             out = subprocess.check_output(['docker','images',
                     '--filter','label=organization=icecube-buildbot',
@@ -120,7 +130,7 @@ def make_workers():
         make_docker(name)
 
         # get labels
-        container_name = 'icecube-buildbot/'+name
+        container_name = 'localhost:5000/icecube-buildbot-'+name
         out = subprocess.check_output(['docker','inspect',container_name])
         config = json.loads(out)[0]['ContainerConfig']
         labels = config['Labels']
@@ -190,8 +200,13 @@ def make_workers():
                             }],
                             'volumes': [{
                                 'name': 'cvmfs-buildbot-worker-shared-storage',
-                                'persistentVolumeClaim':{
-                                    'claimName': 'cvmfs-buildbot-worker-pv-claim',
+                                'cephfs':{
+                                    'monitors': ['10.254.81.20:6790','10.254.156.164:6790','10.254.34.31:6790'],
+                                    'path': '/cvmfs',
+                                    'user': 'admin',
+                                    'secretRef': {
+                                        'name': 'rook-admin'
+                                    },
                                 },
                             }],
                         }, 
@@ -250,11 +265,12 @@ def make_workers():
 
 def main():
     parser = argparse.ArgumentParser(description='setup kubernetes')
+    parser.add_argument('--push',action='store_true',default=False,help='push to docker registry')
     args = parser.parse_args()
 
     make_secrets()
     make_master_cfg()
-    make_docker('master-cvmfs')
+    make_docker('master-cvmfs',push=args.push)
     make_workers()
 
 if __name__ == '__main__':
