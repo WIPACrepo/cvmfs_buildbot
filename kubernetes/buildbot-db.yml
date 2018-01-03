@@ -1,0 +1,39 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: cvmfs-buildbot-db
+spec:
+  selector:
+    matchLabels:
+      app: cvmfs-buildbot-db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: cvmfs-buildbot-db
+        type: postgres
+    spec:
+      containers:
+      - name: buildbot-db
+        image: postgres:10.1-alpine
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cvmfs-buildbot
+              key: db_password
+        - name: POSTGRES_USER
+          value: buildbot
+        volumeMounts:
+        - name: cvmfs-buildbot-db-persistent-storage
+          mountPath: /var/lib/postgresql
+        ports:
+        - containerPort: 5432
+          name: postgres
+          protocol: TCP
+      volumes:
+      - name: cvmfs-buildbot-db-persistent-storage
+        persistentVolumeClaim:
+          claimName: cvmfs-buildbot-db-pv-claim

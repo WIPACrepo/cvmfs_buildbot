@@ -31,18 +31,20 @@ workername = os.environ['WORKERNAME']
 passwd = os.environ['WORKERPASS']
 keepalive = 600
 umask = None
-maxdelay = 300
+maxdelay = 600
+maxretries = 100
 numcpus = None
 allow_shutdown = None
 
 blacklist = ['WORKERPASS']
 if 'WORKER_ENVIRONMENT_BLACKLIST' in os.environ:
     blacklist.extend(os.environ['WORKER_ENVIRONMENT_BLACKLIST'].split(';'))
-    for bl in blacklist:
-        if bl in os.environ:
-            del os.environ[bl]
+for bl in blacklist:
+    if bl in os.environ:
+        del os.environ[bl]
 
 s = Worker(buildmaster_host, port, workername, passwd, basedir,
            keepalive, umask=umask, maxdelay=maxdelay,
+           #maxretries=maxretries,
            numcpus=numcpus, allow_shutdown=allow_shutdown)
 s.setServiceParent(application)

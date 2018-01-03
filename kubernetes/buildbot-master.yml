@@ -16,30 +16,32 @@ spec:
     spec:
       containers:
       - name: buildbot-master
-        image: localhost:5000/icecube-buildbot-master-cvmfs:0.1.17
+        image: localhost:5000/icecube-buildbot-master-cvmfs:0.1.23
         imagePullPolicy: Always
         env:
-        - name: BUILDBOT_CONFIG_DIR
-          value: /var/lib/buildbot
         - name: BUILDBOT_MASTER_URL
-          valueFrom:
-            secretKeyRef:
-              name: cvmfs-buildbot
-              key: master_url
+          value: localhost
         - name: WORKER_PASSWORD
           valueFrom:
             secretKeyRef:
               name: cvmfs-buildbot
               key: worker_password
+        - name: DB_USERNAME
+          value: buildbot
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cvmfs-buildbot
+              key: db_password
+        - name: DB_HOST
+          value: cvmfs-buildbot-db
         volumeMounts:
         - name: cvmfs-buildbot-master-config
           mountPath: /buildbot
         - name: cvmfs-buildbot-master-config-d
           mountPath: /buildbot/master_cfg_d
-        - name: cvmfs-buildbot-master-persistent-storage
-          mountPath: /data
         livenessProbe:
-          httpGet: 
+          httpGet:
             path: /
             port: 8010
           initialDelaySeconds: 120
@@ -57,6 +59,3 @@ spec:
       - name: cvmfs-buildbot-master-config-d
         configMap:
           name: cvmfs-buildbot-master-cfg-d
-      - name: cvmfs-buildbot-master-persistent-storage
-        persistentVolumeClaim:
-          claimName: cvmfs-buildbot-master-pv-claim

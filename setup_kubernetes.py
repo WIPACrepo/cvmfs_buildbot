@@ -30,7 +30,7 @@ def make_secrets():
                 },
                 'data':{
                     'worker_password': b64encode(randstring()),
-                    'master_url': b64encode('localhost'),
+                    'db_password': b64encode(randstring()),
                 },
             }, f, default_flow_style=False)
 
@@ -134,6 +134,7 @@ def make_workers():
         out = subprocess.check_output(['docker','inspect',container_name])
         config = json.loads(out)[0]['ContainerConfig']
         labels = config['Labels']
+        version = labels['version'] if 'version' in labels else 'latest'
         cpus = int(labels['cpus']) if 'cpus' in labels else 1
         gpus = int(labels['gpus']) if 'gpus' in labels else 0
         memory = int(labels['memory']) if 'memory' in labels else 1000
@@ -161,8 +162,8 @@ def make_workers():
                     'template': {
                         'spec': {
                             'containers': [{
-                                'image': container_name,
-                                'imagePullPolicy': 'IfNotPresent',
+                                'image': container_name+':'+version,
+                                'imagePullPolicy': 'Always',
                                 'name': name,
                                 #'resources': {
                                 #    'limits': {

@@ -46,8 +46,8 @@
                                 }
                             }
                         ],
-                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-build",
-                        "imagePullPolicy": "IfNotPresent",
+                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-build:0.1.4",
+                        "imagePullPolicy": "Always",
                         "name": "worker-cvmfs-centos7-build",
                         "volumeMounts": [
                             {
