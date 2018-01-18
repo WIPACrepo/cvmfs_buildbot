@@ -10,7 +10,7 @@ LABEL description="IceCube - CVMFS buildbot worker running centos:7" \
       disk="50" \
       organization="icecube-buildbot" \
       name="worker-cvmfs-centos7-stratum0" \
-      version="0.1.10"
+      version="0.1.11"
 
 COPY buildbot.tac /buildbot/buildbot.tac
 COPY stratum0-start.sh /buildbot/stratum0-start.sh

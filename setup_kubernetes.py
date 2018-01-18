@@ -148,7 +148,8 @@ def make_workers():
                 'apiVersion': 'apps/v1beta1', 
                 'metadata': {
                     'labels': {
-                        'app': 'buildbot-worker'
+                        'app': 'buildbot-worker',
+                        'name': name
                     }, 
                     'name': name
                 },
@@ -156,7 +157,8 @@ def make_workers():
                     'replicas': 1,  
                     'selector': {
                         'matchLabels': {
-                            'app': 'buildbot-worker'
+                            'app': 'buildbot-worker',
+                            'name': name
                         }
                     },
                     'template': {
@@ -213,13 +215,19 @@ def make_workers():
                         }, 
                         'metadata': {
                             'labels': {
-                                'app': 'buildbot-worker'
+                                'app': 'buildbot-worker',
+                                'name': name
                             }
                         }
                     },
                 },
             }
             if 'stratum0' in name:
+                cfg['spec']['template']['spec']['ports'].append({
+                    'containerPort': 80,
+                    'name': 'http',
+                    'protocol': 'TCP',
+                })
                 cfg['spec']['template']['spec']['containers'][0]['volumeMounts'] = [
                     {
                         'name': 'cvmfs-buildbot-worker-shared-storage',

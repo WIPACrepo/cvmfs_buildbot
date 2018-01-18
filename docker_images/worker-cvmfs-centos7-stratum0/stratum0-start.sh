@@ -16,7 +16,7 @@ if [ ! -d /etc/cvmfs/repositories.d/$REPO ]; then
     # wait for httpd to start
     sleep 2
 
-    cvmfs_server mkfs -o buildbot $REPO
+    cvmfs_server import -o buildbot $REPO
 
     if [ $? == 0 ]; then
         python - <<EOF

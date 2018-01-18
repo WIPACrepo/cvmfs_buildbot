@@ -105,19 +105,45 @@ def setup(cfg):
             cfg.locks['cvmfs_shared'].access('exclusive')
         ],
     )
+    
+    factory_whitelist = util.BuildFactory()
+    factory_whitelist.addStep(steps.ShellCommand(
+        name='resign whitelist',
+        command='cd /srv/cvmfs/icecube.opensciencegrid.org && rm -f .cvmfswhitelist.new && wget -qO .cvmfswhitelist.new http://oasis.opensciencegrid.org/cvmfs/icecube.opensciencegrid.org/.cvmfswhitelist && mv .cvmfswhitelist.new .cvmfswhitelist'],
+        haltOnFailure=True,
+    ))
+
+    cfg['builders'][prefix+'_whitelist'] = util.BuilderConfig(
+        name=prefix+'_whitelist',
+        workername=workername,
+        factory=factory_whitelist,
+        properties={},
+        locks=[
+            cfg.locks['cvmfs_shared'].access('exclusive')
+        ],
+    )
 
 
     ####### SCHEDULERS
 
     cfg['schedulers'][prefix+'-force'] = schedulers.ForceScheduler(
         name="publish",
-        builderNames=list(cfg['builders'].keys()),
+        builderNames=[prefix+'_builder'],
         properties=[
             util.StringParameter(name="variant",
                                  label="Variant:",
                                  default="", size=80),
         ],
     )
+
+    # update the whitelist every day at 3am
+    cfg['schedulers'][prefix+'-whitelist'] = schedulers.Nightly(
+        name="whitelist",
+        builderNames=[prefix+'_whitelist'],
+        hour=3, minute=0,
+    )
+
+    
 
 config = Config(setup)
 config.locks['cvmfs_shared'] = util.MasterLock('cvmfs_lock', maxCount=100)
