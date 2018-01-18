@@ -6,7 +6,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   #persistentVolumeReclaimPolicy: Retain
-  StorageClass: rook-storage
+  storageClassName: rook-block
   resources:
     requests:
-      storage: 100mi
+      storage: 100Mi

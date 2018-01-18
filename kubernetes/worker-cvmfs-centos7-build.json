@@ -49,6 +49,12 @@
                         "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-build:0.1.4",
                         "imagePullPolicy": "Always",
                         "name": "worker-cvmfs-centos7-build",
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "8000Mi"
+                            }
+                        },
                         "volumeMounts": [
                             {
                                 "mountPath": "/cvmfs",
@@ -62,7 +68,7 @@
                         "cephfs": {
                             "monitors": [
                                 "10.254.81.20:6790",
-                                "10.254.156.164:6790",
+                                "10.254.109.34:6790",
                                 "10.254.34.31:6790"
                             ],
                             "path": "/cvmfs",

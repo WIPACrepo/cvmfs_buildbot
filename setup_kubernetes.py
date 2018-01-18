@@ -165,13 +165,13 @@ def make_workers():
                                 'image': container_name+':'+version,
                                 'imagePullPolicy': 'Always',
                                 'name': name,
-                                #'resources': {
-                                #    'limits': {
-                                #        'cpu': cpus,
-                                #        'memory': memory,
-                                #        #'alpha.kubernetes.io/nvidia-gpu': gpus,
-                                #    },
-                                #},
+                                'resources': {
+                                    'limits': {
+                                        'cpu': str(cpus),
+                                        'memory': str(memory)+"Mi",
+                                        #'alpha.kubernetes.io/nvidia-gpu': gpus,
+                                    },
+                                },
                                 'env': [
                                     {
                                         'name': 'BUILDMASTER', 
@@ -202,7 +202,7 @@ def make_workers():
                             'volumes': [{
                                 'name': 'cvmfs-buildbot-worker-shared-storage',
                                 'cephfs':{
-                                    'monitors': ['10.254.81.20:6790','10.254.156.164:6790','10.254.34.31:6790'],
+                                    'monitors': ['10.254.81.20:6790','10.254.109.34:6790','10.254.34.31:6790'],
                                     'path': '/cvmfs',
                                     'user': 'admin',
                                     'secretRef': {
@@ -237,6 +237,15 @@ def make_workers():
                         'name': 'cvmfs-buildbot-stratum0-config-storage',
                         'mountPath': '/mnt/cvmfs_config',
                     },
+                    {
+                        'name': 'fuse',
+                        'mountPath': '/dev/fuse',
+                    },
+                    {
+                        'name': 'cgroup',
+                        'mountPath': '/sys/fs/cgroup',
+                        'readOnly': True,
+                    },
                 ]
                 cfg['spec']['template']['spec']['volumes'].extend([
                     {
@@ -247,7 +256,9 @@ def make_workers():
                     },
                     {
                         'name': 'cvmfs-buildbot-stratum0-tmp-storage',
-                        'emptyDir':{},
+                        'persistentVolumeClaim':{
+                            'claimName': 'cvmfs-buildbot-stratum0-spool-pv-claim',
+                        },
                     },
                     {
                         'name': 'cvmfs-buildbot-stratum0-config-storage',
@@ -255,11 +266,24 @@ def make_workers():
                             'claimName': 'cvmfs-buildbot-stratum0-config-pv-claim',
                         },
                     },
+                    {
+                        'name': 'fuse',
+                        'hostPath':{
+                            'path': '/dev/fuse',
+                        },
+                    },
+                    {
+                        'name': 'cgroup',
+                        'hostPath':{
+                            'path': '/sys/fs/cgroup',
+                        },
+                    },
                 ])
                 cfg['spec']['template']['spec']['containers'][0]['securityContext'] = {
                     'capabilities': {
                         'add': ['SYS_ADMIN'],
                     },
+                    'privileged': True,
                 }
             json.dump(cfg, f, sort_keys=True, indent=4, separators=(',',': '))
     

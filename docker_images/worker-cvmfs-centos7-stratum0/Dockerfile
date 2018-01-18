@@ -10,7 +10,7 @@ LABEL description="IceCube - CVMFS buildbot worker running centos:7" \
       disk="50" \
       organization="icecube-buildbot" \
       name="worker-cvmfs-centos7-stratum0" \
-      version="0.1.6"
+      version="0.1.10"
 
 COPY buildbot.tac /buildbot/buildbot.tac
 COPY stratum0-start.sh /buildbot/stratum0-start.sh
@@ -32,8 +32,16 @@ RUN \
     echo -e "#!/bin/sh\ntwistd -ny buildbot.tac" > /buildbot/start.sh && chmod +x /buildbot/start.sh && \
     useradd -ms /bin/bash buildbot && chown -R buildbot /buildbot && \
     mkdir -p /mnt/cvmfs_config && \
-    echo -e "[Unit]\nDescription=CVMFS-setup\nAfter=httpd.target\n\n[Service]\nUser=root\nGroup=root\nWorkingDirectory=/\nExecStart=/buildbot/stratum0-start.sh\n\n[Install]\nWantedBy=multi-user.target" > /etc/systemd/system/cvmfs-setup.service && \
-    echo -e "[Unit]\nDescription=Buildbot\nAfter=cvmfs-setup.target\n\n[Service]\nUser=buildbot\nGroup=buildbot\nWorkingDirectory=/buildbot\nExecStart=/buildbot/start.sh\n\n[Install]\nWantedBy=multi-user.target" > /etc/systemd/system/buildbot.service && \
+    (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done) && \
+    rm -f /lib/systemd/system/multi-user.target.wants/* && \
+    rm -f /etc/systemd/system/*.wants/* && \
+    rm -f /lib/systemd/system/local-fs.target.wants/* && \
+    rm -f /lib/systemd/system/sockets.target.wants/*udev* && \
+    rm -f /lib/systemd/system/sockets.target.wants/*initctl* && \
+    rm -f /lib/systemd/system/basic.target.wants/* && \
+    rm -f /lib/systemd/system/anaconda.target.wants/* && \
+    printf "[Unit]\nDescription=CVMFS-setup\nAfter=httpd.target\n\n[Service]\nUser=root\nGroup=root\nWorkingDirectory=/\nExecStart=/buildbot/stratum0-start.sh\n\n[Install]\nWantedBy=multi-user.target" > /etc/systemd/system/cvmfs-setup.service && \
+    printf "[Unit]\nDescription=Buildbot\nAfter=cvmfs-setup.target\n\n[Service]\nUser=buildbot\nGroup=buildbot\nWorkingDirectory=/buildbot\nExecStart=/buildbot/start.sh\n\n[Install]\nWantedBy=multi-user.target" > /etc/systemd/system/buildbot.service && \
     systemctl enable httpd && \
     systemctl enable cvmfs-setup && \
     systemctl enable buildbot && \

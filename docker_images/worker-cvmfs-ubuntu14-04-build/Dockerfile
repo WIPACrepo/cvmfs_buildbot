@@ -9,14 +9,14 @@ LABEL description="IceCube - CVMFS buildbot worker with devel packages running u
       gpus="0" \
       organization="icecube-buildbot" \
       name="worker-cvmfs-ubuntu14-04-build" \
-      version="0.1.7"
+      version="0.1.8"
 
 COPY buildbot.tac /buildbot/buildbot.tac
 
 RUN \
     apt-get update && \
     apt-get -y install build-essential autoconf automake make \
-        m4 bison flex gfortran \
+        m4 bison flex gfortran pkg-config \
         libtool patch binutils unzip git subversion wget curl \
         libpng-dev libssl-dev libX11-dev zlib1g-dev libbz2-dev \
         libncurses5-dev libreadline-dev freeglut3-dev libffi-dev \
