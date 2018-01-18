@@ -3,7 +3,8 @@
     "kind": "Deployment",
     "metadata": {
         "labels": {
-            "app": "buildbot-worker"
+            "app": "buildbot-worker",
+            "name": "worker-cvmfs-ubuntu16-04-build"
         },
         "name": "worker-cvmfs-ubuntu16-04-build"
     },
@@ -11,13 +12,15 @@
         "replicas": 1,
         "selector": {
             "matchLabels": {
-                "app": "buildbot-worker"
+                "app": "buildbot-worker",
+                "name": "worker-cvmfs-ubuntu16-04-build"
             }
         },
         "template": {
             "metadata": {
                 "labels": {
-                    "app": "buildbot-worker"
+                    "app": "buildbot-worker",
+                    "name": "worker-cvmfs-ubuntu16-04-build"
                 }
             },
             "spec": {
@@ -63,6 +66,7 @@
                         ]
                     }
                 ],
+                "ports": [],
                 "volumes": [
                     {
                         "cephfs": {

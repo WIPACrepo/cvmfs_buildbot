@@ -109,7 +109,7 @@ def setup(cfg):
     factory_whitelist = util.BuildFactory()
     factory_whitelist.addStep(steps.ShellCommand(
         name='resign whitelist',
-        command='cd /srv/cvmfs/icecube.opensciencegrid.org && rm -f .cvmfswhitelist.new && wget -qO .cvmfswhitelist.new http://oasis.opensciencegrid.org/cvmfs/icecube.opensciencegrid.org/.cvmfswhitelist && mv .cvmfswhitelist.new .cvmfswhitelist'],
+        command='cd /srv/cvmfs/icecube.opensciencegrid.org && rm -f .cvmfswhitelist.new && wget -qO .cvmfswhitelist.new http://oasis.opensciencegrid.org/cvmfs/icecube.opensciencegrid.org/.cvmfswhitelist && mv .cvmfswhitelist.new .cvmfswhitelist',
         haltOnFailure=True,
     ))
 
@@ -123,6 +123,22 @@ def setup(cfg):
         ],
     )
 
+    factory_backup = util.BuildFactory()
+    factory_backup.addStep(steps.ShellCommand(
+        name='rsync',
+        command=['rsync','-a','-i','/cvmfs-source/icecube.opensciencegrid.org','rsync://nfs-5.icecube.wisc.edu/cvmfs/'],
+        haltOnFailure=True,
+    ))
+
+    cfg['builders'][prefix+'_backup'] = util.BuilderConfig(
+        name=prefix+'_backup',
+        workername=workername,
+        factory=factory_backup,
+        properties={},
+        locks=[
+            cfg.locks['cvmfs_shared'].access('exclusive')
+        ],
+    )
 
     ####### SCHEDULERS
 
@@ -143,7 +159,13 @@ def setup(cfg):
         hour=3, minute=0,
     )
 
-    
+    # backup cvmfs the first day of every month, at 4am
+    cfg['schedulers'][prefix+'-backup'] = schedulers.Nightly(
+        name="backup",
+        builderNames=[prefix+'_backup'],
+        dayOfMonth=1, hour=4, minute=0,
+    )
+
 
 config = Config(setup)
 config.locks['cvmfs_shared'] = util.MasterLock('cvmfs_lock', maxCount=100)

@@ -201,6 +201,7 @@ def make_workers():
                                     },
                                 ],
                             }],
+                            'ports': [],
                             'volumes': [{
                                 'name': 'cvmfs-buildbot-worker-shared-storage',
                                 'cephfs':{

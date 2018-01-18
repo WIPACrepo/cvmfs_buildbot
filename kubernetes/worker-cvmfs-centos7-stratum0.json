@@ -3,7 +3,8 @@
     "kind": "Deployment",
     "metadata": {
         "labels": {
-            "app": "buildbot-worker"
+            "app": "buildbot-worker",
+            "name": "worker-cvmfs-centos7-stratum0"
         },
         "name": "worker-cvmfs-centos7-stratum0"
     },
@@ -11,13 +12,15 @@
         "replicas": 1,
         "selector": {
             "matchLabels": {
-                "app": "buildbot-worker"
+                "app": "buildbot-worker",
+                "name": "worker-cvmfs-centos7-stratum0"
             }
         },
         "template": {
             "metadata": {
                 "labels": {
-                    "app": "buildbot-worker"
+                    "app": "buildbot-worker",
+                    "name": "worker-cvmfs-centos7-stratum0"
                 }
             },
             "spec": {
@@ -46,7 +49,7 @@
                                 }
                             }
                         ],
-                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-stratum0:0.1.10",
+                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-stratum0:0.1.11",
                         "imagePullPolicy": "Always",
                         "name": "worker-cvmfs-centos7-stratum0",
                         "resources": {
@@ -90,6 +93,13 @@
                                 "readOnly": true
                             }
                         ]
+                    }
+                ],
+                "ports": [
+                    {
+                        "containerPort": 80,
+                        "name": "http",
+                        "protocol": "TCP"
                     }
                 ],
                 "volumes": [
