@@ -9,7 +9,7 @@ LABEL description="IceCube - CVMFS buildbot worker with devel packages running u
       gpus="0" \
       organization="icecube-buildbot" \
       name="worker-cvmfs-ubuntu14-04-build" \
-      version="0.1.8"
+      version="0.1.9"
 
 COPY buildbot.tac /buildbot/buildbot.tac
 
@@ -27,10 +27,10 @@ RUN \
     mkdir /cvmfs && mkdir -p /usr/share/buildbot && \
     printf "#!/bin/sh\ntwistd -ny buildbot.tac" > /usr/share/buildbot/run.sh && \
     chmod +x /usr/share/buildbot/run.sh && \
-    useradd -ms /bin/bash buildbot && chown -R buildbot /buildbot
+    useradd -m -u 1000 -s /bin/bash buildbot && chown -R buildbot /buildbot
 
 WORKDIR /buildbot
 
 ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
 
-CMD ["bash","-c","chown -R buildbot /cvmfs; su -c /usr/share/buildbot/run.sh buildbot"]
+CMD ["bash","-c","chown buildbot /cvmfs; su -c /usr/share/buildbot/run.sh buildbot"]

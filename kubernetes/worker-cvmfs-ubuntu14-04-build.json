@@ -49,9 +49,10 @@
                                 }
                             }
                         ],
-                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-ubuntu14-04-build:0.1.8",
+                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-ubuntu14-04-build:0.1.9",
                         "imagePullPolicy": "Always",
                         "name": "worker-cvmfs-ubuntu14-04-build",
+                        "ports": [],
                         "resources": {
                             "limits": {
                                 "cpu": "4",
@@ -66,7 +67,6 @@
                         ]
                     }
                 ],
-                "ports": [],
                 "volumes": [
                     {
                         "cephfs": {

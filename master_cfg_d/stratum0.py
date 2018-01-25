@@ -109,7 +109,7 @@ def setup(cfg):
     factory_whitelist = util.BuildFactory()
     factory_whitelist.addStep(steps.ShellCommand(
         name='resign whitelist',
-        command='cd /srv/cvmfs/icecube.opensciencegrid.org && rm -f .cvmfswhitelist.new && wget -qO .cvmfswhitelist.new http://oasis.opensciencegrid.org/cvmfs/icecube.opensciencegrid.org/.cvmfswhitelist && mv .cvmfswhitelist.new .cvmfswhitelist',
+        command='cd /srv/cvmfs/icecube.opensciencegrid.org && rm -f .cvmfswhitelist.new && wget -qO .cvmfswhitelist.new http://oasis.opensciencegrid.org/cvmfs/icecube.opensciencegrid.org/.cvmfswhitelist && mv -f .cvmfswhitelist.new .cvmfswhitelist',
         haltOnFailure=True,
     ))
 

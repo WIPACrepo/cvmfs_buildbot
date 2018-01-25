@@ -49,13 +49,20 @@
                                 }
                             }
                         ],
-                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-stratum0:0.1.11",
+                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-stratum0:0.1.16",
                         "imagePullPolicy": "Always",
                         "name": "worker-cvmfs-centos7-stratum0",
+                        "ports": [
+                            {
+                                "containerPort": 80,
+                                "name": "http",
+                                "protocol": "TCP"
+                            }
+                        ],
                         "resources": {
                             "limits": {
                                 "cpu": "1",
-                                "memory": "1000Mi"
+                                "memory": "6000Mi"
                             }
                         },
                         "securityContext": {
@@ -95,13 +102,6 @@
                         ]
                     }
                 ],
-                "ports": [
-                    {
-                        "containerPort": 80,
-                        "name": "http",
-                        "protocol": "TCP"
-                    }
-                ],
                 "volumes": [
                     {
                         "cephfs": {
@@ -127,7 +127,7 @@
                     {
                         "name": "cvmfs-buildbot-stratum0-tmp-storage",
                         "persistentVolumeClaim": {
-                            "claimName": "cvmfs-buildbot-stratum0-spool-pv-claim"
+                            "claimName": "cvmfs-buildbot-stratum0-spool-pv-claim2"
                         }
                     },
                     {

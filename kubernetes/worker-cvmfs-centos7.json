@@ -52,6 +52,7 @@
                         "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7:0.1",
                         "imagePullPolicy": "Always",
                         "name": "worker-cvmfs-centos7",
+                        "ports": [],
                         "resources": {
                             "limits": {
                                 "cpu": "1",
@@ -66,7 +67,6 @@
                         ]
                     }
                 ],
-                "ports": [],
                 "volumes": [
                     {
                         "cephfs": {

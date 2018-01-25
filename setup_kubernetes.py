@@ -200,8 +200,8 @@ def make_workers():
                                         'mountPath': '/cvmfs',
                                     },
                                 ],
+                                'ports': [],
                             }],
-                            'ports': [],
                             'volumes': [{
                                 'name': 'cvmfs-buildbot-worker-shared-storage',
                                 'cephfs':{
@@ -224,7 +224,7 @@ def make_workers():
                 },
             }
             if 'stratum0' in name:
-                cfg['spec']['template']['spec']['ports'].append({
+                cfg['spec']['template']['spec']['containers'][0]['ports'].append({
                     'containerPort': 80,
                     'name': 'http',
                     'protocol': 'TCP',
@@ -266,7 +266,7 @@ def make_workers():
                     {
                         'name': 'cvmfs-buildbot-stratum0-tmp-storage',
                         'persistentVolumeClaim':{
-                            'claimName': 'cvmfs-buildbot-stratum0-spool-pv-claim',
+                            'claimName': 'cvmfs-buildbot-stratum0-spool-pv-claim2',
                         },
                     },
                     {

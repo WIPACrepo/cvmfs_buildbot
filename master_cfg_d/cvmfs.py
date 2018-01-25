@@ -12,6 +12,7 @@ from . import Config, get_os
 prefix = __file__.split('/')[-1].rsplit('.',1)[0]
 
 worker_cfgs = {
+    'cvmfs-centos6-build': 'worker-cvmfs-centos6-build',
     'cvmfs-centos7-build': 'worker-cvmfs-centos7-build',
     'cvmfs-ubuntu14-04-build': 'worker-cvmfs-ubuntu14-04-build',
     'cvmfs-ubuntu16-04-build': 'worker-cvmfs-ubuntu16-04-build',

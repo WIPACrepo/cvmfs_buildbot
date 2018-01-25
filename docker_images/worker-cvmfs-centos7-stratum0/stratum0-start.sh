@@ -4,24 +4,24 @@ REPO=icecube.opensciencegrid.org
 
 # set up cvmfs_config
 if [ -d /mnt/cvmfs_config ]; then
-    if [ ! -L /etc/cvmfs ]; then
-        rsync -a --exclude '*icecube*' /etc/cvmfs/ /mnt/cvmfs_config/
-        rm -rf /etc/cvmfs
-        ln -s /mnt/cvmfs_config /etc/cvmfs
-    fi
+    rsync -a /mnt/cvmfs_config/keys/ /etc/cvmfs/keys/
 fi
 
-# make cvmfs fs if not already existing
-if [ ! -d /etc/cvmfs/repositories.d/$REPO ]; then
-    # wait for httpd to start
-    sleep 2
+# always import cvmfs on startup
+if [ -d /etc/cvmfs/repositories.d/$REPO ]; then
+    rm -rf /etc/cvmfs/repositories.d/$REPO
+fi
 
-    cvmfs_server import -o buildbot $REPO
+# wait for httpd to start
+sleep 2
 
-    if [ $? == 0 ]; then
-        python - <<EOF
+rm -rf /var/spool/cvmfs/$REPO
+cvmfs_server import -o buildbot $REPO
+
+if [ $? == 0 ]; then
+    python - <<EOF
 import os
-path = "server.conf"
+path = "/etc/cvmfs/repositories.d/$REPO/server.conf"
 newdata = {
 'CVMFS_IGNORE_XDIR_HARDLINKS':'true',
 'CVMFS_GENERATE_LEGACY_BULK_CHUNKS':'false',
@@ -31,17 +31,15 @@ newdata = {
 }
 lines = open(path).read().split('\n')
 with open(path,'w') as f:
-for l in lines:
-    if '=' in l:
-        parts = l.split('=',1)
-        k = parts[0].strip()
-        if k in newdata:
-            l = k+'='+newdata[k]
-    f.write(l+'\n')
+    for l in lines:
+        if '=' in l:
+            parts = l.split('=',1)
+            k = parts[0].strip()
+            if k in newdata:
+                l = k+'='+newdata[k]
+        f.write(l+'\n')
 EOF
-    else
-        rm -rf /etc/cvmfs/repositories.d/$REPO
-        rm -rf /cvmfs/repositories.d/$REPO
-        exit 1
-    fi
+else
+    rm -rf /etc/cvmfs/repositories.d/$REPO
+    exit 1
 fi

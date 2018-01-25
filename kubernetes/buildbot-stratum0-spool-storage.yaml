@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: cvmfs-buildbot-stratum0-spool-pv-claim
+  name: cvmfs-buildbot-stratum0-spool-pv-claim2
 spec:
   accessModes:
     - ReadWriteOnce
@@ -9,4 +9,4 @@ spec:
   storageClassName: rook-block
   resources:
     requests:
-      storage: 60Gi
+      storage: 120Gi

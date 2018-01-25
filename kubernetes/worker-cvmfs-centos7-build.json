@@ -49,9 +49,10 @@
                                 }
                             }
                         ],
-                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-build:0.1.4",
+                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-build:0.1.5",
                         "imagePullPolicy": "Always",
                         "name": "worker-cvmfs-centos7-build",
+                        "ports": [],
                         "resources": {
                             "limits": {
                                 "cpu": "4",
@@ -66,7 +67,6 @@
                         ]
                     }
                 ],
-                "ports": [],
                 "volumes": [
                     {
                         "cephfs": {
