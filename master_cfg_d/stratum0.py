@@ -16,7 +16,7 @@ def setup(cfg):
 
     ####### WORKERS
 
-    workername = 'cvmfs-stratum0'
+    workername = 'cvmfs-centos7-stratum0'
     cfg['workers'][prefix] = worker.Worker(
         workername, os.environ['WORKER_PASSWORD'],
         max_builds=1,
