@@ -1,0 +1,90 @@
+{
+    "apiVersion": "apps/v1beta1",
+    "kind": "Deployment",
+    "metadata": {
+        "labels": {
+            "app": "buildbot-worker",
+            "name": "worker-cvmfs-ubuntu15-10-build"
+        },
+        "name": "worker-cvmfs-ubuntu15-10-build"
+    },
+    "spec": {
+        "replicas": 1,
+        "selector": {
+            "matchLabels": {
+                "app": "buildbot-worker",
+                "name": "worker-cvmfs-ubuntu15-10-build"
+            }
+        },
+        "template": {
+            "metadata": {
+                "labels": {
+                    "app": "buildbot-worker",
+                    "name": "worker-cvmfs-ubuntu15-10-build"
+                }
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "env": [
+                            {
+                                "name": "BUILDMASTER",
+                                "value": "cvmfs-buildbot-worker"
+                            },
+                            {
+                                "name": "BUILDMASTER_PORT",
+                                "value": "9989"
+                            },
+                            {
+                                "name": "WORKERNAME",
+                                "value": "cvmfs-ubuntu15-10-build"
+                            },
+                            {
+                                "name": "WORKERPASS",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "worker_password",
+                                        "name": "cvmfs-buildbot"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-ubuntu15-10-build:0.1.1",
+                        "imagePullPolicy": "Always",
+                        "name": "worker-cvmfs-ubuntu15-10-build",
+                        "ports": [],
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "8000Mi"
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/cvmfs",
+                                "name": "cvmfs-buildbot-worker-shared-storage"
+                            }
+                        ]
+                    }
+                ],
+                "volumes": [
+                    {
+                        "cephfs": {
+                            "monitors": [
+                                "10.254.81.20:6790",
+                                "10.254.109.34:6790",
+                                "10.254.34.31:6790"
+                            ],
+                            "path": "/cvmfs",
+                            "secretRef": {
+                                "name": "rook-admin"
+                            },
+                            "user": "admin"
+                        },
+                        "name": "cvmfs-buildbot-worker-shared-storage"
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -15,6 +15,7 @@ worker_cfgs = {
     'cvmfs-centos6-build': 'worker-cvmfs-centos6-build',
     'cvmfs-centos7-build': 'worker-cvmfs-centos7-build',
     'cvmfs-ubuntu14-04-build': 'worker-cvmfs-ubuntu14-04-build',
+    'cvmfs-ubuntu15-10-build': 'worker-cvmfs-ubuntu15-10-build',
     'cvmfs-ubuntu16-04-build': 'worker-cvmfs-ubuntu16-04-build',
 }
 
@@ -92,7 +93,7 @@ def setup(cfg):
         workdir='build',
         haltOnFailure=True,
         locks=[
-            cfg.locks['cvmfs_shared'].access('exclusive')
+            cfg.locks['cvmfs_shared'].access('counting')
         ],
     ))
 
