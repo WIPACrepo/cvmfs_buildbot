@@ -28,6 +28,7 @@ newdata = {
 'CVMFS_AUTOCATALOGS':'true',
 'CVMFS_AUTO_TAG':'false',
 'CVMFS_GARBAGE_COLLECTION':'true',
+'CVMFS_FILE_MBYTE_LIMIT':2048,
 }
 lines = open(path).read().split('\n')
 with open(path,'w') as f:
