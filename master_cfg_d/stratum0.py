@@ -78,6 +78,7 @@ def setup(cfg):
             util.Interpolate('/cvmfs-source/icecube.opensciencegrid.org/$(prop:variant)s'),
             util.Interpolate('/cvmfs/icecube.opensciencegrid.org/$(prop:variant)s'),
         ],
+        timeout=7200, # 2 hours
         haltOnFailure=True,
         doStepIf=BuildPassed,
     ))
@@ -127,6 +128,7 @@ def setup(cfg):
     factory_backup.addStep(steps.ShellCommand(
         name='rsync',
         command=['rsync','-a','-i','/cvmfs-source/icecube.opensciencegrid.org','rsync://nfs-5.icecube.wisc.edu/cvmfs/'],
+        timeout=14400, # 4 hours
         haltOnFailure=True,
     ))
 
@@ -163,7 +165,7 @@ def setup(cfg):
     cfg['schedulers'][prefix+'-backup'] = schedulers.Nightly(
         name="backup",
         builderNames=[prefix+'_backup'],
-        dayOfMonth=1, hour=4, minute=0,
+        dayOfMonth=9, hour=4, minute=0,
     )
 
 
