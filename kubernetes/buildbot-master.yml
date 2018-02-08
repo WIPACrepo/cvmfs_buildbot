@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: buildbot-master
-        image: localhost:5000/icecube-buildbot-master-cvmfs:0.1.23
+        image: localhost:5000/icecube-buildbot-master-cvmfs:0.1.31
         imagePullPolicy: Always
         env:
         - name: BUILDBOT_MASTER_URL

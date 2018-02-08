@@ -9,10 +9,11 @@ LABEL description="IceCube - CVMFS buildbot master running centos:7" \
       gpus="0" \
       organization="icecube-buildbot" \
       name="master-cvmfs" \
-      version="0.1.23"
+      version="0.1.31"
 
 COPY buildbot.tac /usr/share/buildbot/buildbot.tac
 COPY run.sh /usr/share/buildbot/run.sh
+COPY ldapauth.py /usr/share/buildbot/ldapauth.py
 
 RUN \
     yum clean all && \
@@ -20,7 +21,7 @@ RUN \
         patch binutils file which libffi python-devel sqlalchemy && \
     yum clean all && \
     curl "https://bootstrap.pypa.io/get-pip.py" | python && \
-    pip --no-cache-dir install dumb-init psycopg2 SQLAlchemy buildbot[bundle,tls] && \
+    pip --no-cache-dir install dumb-init psycopg2 SQLAlchemy ldap3 buildbot[bundle,tls] && \
     mkdir /buildbot && mkdir /data && \
     useradd -ms /bin/bash buildbot && chown -R buildbot /data /usr/share/buildbot
 
