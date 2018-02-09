@@ -16,6 +16,9 @@
                 "name": "worker-cvmfs-ubuntu15-10-build"
             }
         },
+        "strategy": {
+            "type": "Recreate"
+        },
         "template": {
             "metadata": {
                 "labels": {

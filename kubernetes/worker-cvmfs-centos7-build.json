@@ -16,6 +16,9 @@
                 "name": "worker-cvmfs-centos7-build"
             }
         },
+        "strategy": {
+            "type": "Recreate"
+        },
         "template": {
             "metadata": {
                 "labels": {

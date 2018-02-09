@@ -16,6 +16,9 @@
                 "name": "worker-cvmfs-centos7-stratum0"
             }
         },
+        "strategy": {
+            "type": "Recreate"
+        },
         "template": {
             "metadata": {
                 "labels": {

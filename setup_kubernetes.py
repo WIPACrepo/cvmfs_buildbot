@@ -161,6 +161,9 @@ def make_workers():
                             'name': name
                         }
                     },
+                    'strategy':{
+                        'type': 'Recreate',
+                    },
                     'template': {
                         'spec': {
                             'containers': [{

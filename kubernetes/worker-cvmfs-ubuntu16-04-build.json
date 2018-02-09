@@ -16,6 +16,9 @@
                 "name": "worker-cvmfs-ubuntu16-04-build"
             }
         },
+        "strategy": {
+            "type": "Recreate"
+        },
         "template": {
             "metadata": {
                 "labels": {
