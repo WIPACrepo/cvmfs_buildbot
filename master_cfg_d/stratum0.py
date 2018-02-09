@@ -165,7 +165,7 @@ def setup(cfg):
     cfg['schedulers'][prefix+'-backup'] = schedulers.Nightly(
         name="backup",
         builderNames=[prefix+'_backup'],
-        dayOfMonth=9, hour=4, minute=0,
+        dayOfMonth=1, hour=4, minute=0,
     )
 
 
