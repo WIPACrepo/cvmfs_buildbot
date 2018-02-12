@@ -74,7 +74,7 @@ def setup(cfg):
     factory.addStep(steps.ShellCommand(
         name='rsync',
         command=[
-            'cvmfs_rsync',
+            'cvmfs_rsync','-ai','--delete',
             util.Interpolate('/cvmfs-source/icecube.opensciencegrid.org/$(prop:variant)s'),
             util.Interpolate('/cvmfs/icecube.opensciencegrid.org/$(prop:variant)s'),
         ],
@@ -127,7 +127,7 @@ def setup(cfg):
     factory_backup = util.BuildFactory()
     factory_backup.addStep(steps.ShellCommand(
         name='rsync',
-        command=['rsync','-a','-i','/cvmfs-source/icecube.opensciencegrid.org','rsync://nfs-5.icecube.wisc.edu/cvmfs/'],
+        command=['rsync','-ai','--delete','/cvmfs-source/icecube.opensciencegrid.org','rsync://nfs-5.icecube.wisc.edu/cvmfs/'],
         timeout=14400, # 4 hours
         haltOnFailure=True,
     ))
