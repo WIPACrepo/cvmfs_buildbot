@@ -24,7 +24,6 @@ def setup(cfg):
     ####### WORKERS
 
     for name in worker_cfgs:
-        workername = 'cvmfs-centos7-build'
         cfg['workers'][name] = worker.Worker(
             name, os.environ['WORKER_PASSWORD'],
             max_builds=1,
@@ -71,20 +70,21 @@ def setup(cfg):
             return SKIPPED
     """
 
-    factory = util.BuildFactory()
-    factory.addStep(steps.Git(
+    build_factory = util.BuildFactory()
+    build_factory.addStep(steps.Git(
         repourl='git://github.com/WIPACrepo/cvmfs.git',
         mode='full',
         method='clobber',
         workdir='build',
     ))
-    factory.addStep(steps.ShellCommand(
+    build_factory.addStep(steps.ShellCommand(
         name='build cvmfs',
         command=[
             'python', 'builders/build.py',
             '--src', 'icecube.opensciencegrid.org',
             '--dest', '/cvmfs/icecube.opensciencegrid.org',
             '--variant', util.Property('variant'),
+            '--svnup', 'False',
         ],
         env={
             'CPUS': util.Property('CPUS', default='1'),
@@ -97,15 +97,55 @@ def setup(cfg):
         ],
     ))
 
-    
+    svn_factory = util.BuildFactory()
+    svn_factory.addStep(steps.Git(
+        repourl='git://github.com/WIPACrepo/cvmfs.git',
+        mode='full',
+        method='clobber',
+        workdir='build',
+    ))
+    svn_factory.addStep(steps.ShellCommand(
+        name='svn checkout',
+        command=[
+            'python', 'builders/build.py',
+            '--src', 'icecube.opensciencegrid.org',
+            '--dest', '/cvmfs/icecube.opensciencegrid.org',
+            '--variant', util.Property('variant'),
+            '--svnup', 'True',
+            '--svnonly', 'True',
+        ],
+        env={
+            'CPUS': util.Property('CPUS', default='1'),
+            'MEMORY': util.Property('MEMORY', default='1'),
+        },
+        workdir='build',
+        haltOnFailure=True,
+        locks=[
+            cfg.locks['cvmfs_shared'].access('exclusive')
+        ],
+    ))
+    svn_factory.addStep(steps.Trigger(schedulerNames=[prefix+'-build'],
+        waitForFinish=True,
+        updateSourceStamp=True,
+        set_properties={ 'variant' : util.Property('variant') }
+    ))
+
+    builders = []
     for name in worker_cfgs:
         cfg['builders'][name+'_builder'] = util.BuilderConfig(
             name=name+'_builder',
             workername=name,
-            factory=factory,
+            factory=build_factory,
             properties={},
         )
+        builders.append(name+'_builder')
 
+    cfg['builders']['svn_builder'] = util.BuilderConfig(
+        name='svn_builder',
+        workername=list(worker_cfgs.keys())[0],
+        factory=svn_factory,
+        properties={},
+    )
 
     ####### SCHEDULERS
 
@@ -115,17 +155,28 @@ def setup(cfg):
             name=prefix+'-'+v,
             change_filter=util.ChangeFilter(category=prefix),
             treeStableTimer=None,
-            builderNames=list(cfg['builders'].keys()),
+            builderNames=['svn_builder'],
             properties={'variant':v},
         )
+    cfg['schedulers'][prefix+'-triggerable'] = schedulers.Triggerable(
+        name=prefix+"-build",
+        builderNames=builders,
+    )
     cfg['schedulers'][prefix+'-force'] = schedulers.ForceScheduler(
         name=prefix+"-force",
-        builderNames=list(cfg['builders'].keys()),
+        builderNames=['svn_builder'],
         properties=[
             util.StringParameter(name="variant",
                                  label="Variant:",
                                  default="", size=80),
         ],
+    )
+
+    cfg['schedulers'][prefix+'-nightly'] = schedulers.Nightly(
+        name=prefix+'-nightly',
+        builderNames=['svn_builder'],
+        properties={'variant':'py2_v3_metaproject'},
+        hour=0, minute=0,
     )
 
 config = Config(setup)
