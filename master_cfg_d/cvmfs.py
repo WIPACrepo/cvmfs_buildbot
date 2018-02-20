@@ -26,7 +26,7 @@ def setup(cfg):
     for name in worker_cfgs:
         cfg['workers'][name] = worker.Worker(
             name, os.environ['WORKER_PASSWORD'],
-            max_builds=1,
+            max_builds=2,
             properties={
                 'CPUS': '4',
                 'MEMORY': '8000',
@@ -69,6 +69,27 @@ def setup(cfg):
                 return SUCCESS
             return SKIPPED
     """
+    
+    @util.renderer
+    def makeCommand(props):
+        command = [
+            'python', 'builders/build.py',
+            '--src', 'icecube.opensciencegrid.org',
+            '--dest', '/cvmfs/icecube.opensciencegrid.org',
+            '--variant', props.getProperty('variant'),
+        ]
+        if props.getProperty('svnonly'):
+            command.extend([
+                '--svnup', 'True',
+                '--svnonly', 'True',
+            ])
+        else:
+            command.extend([
+                '--svnup', 'False',
+            ])
+        if props.getProperty('nightly'):
+            command.append(['--nightly'])
+        return command
 
     build_factory = util.BuildFactory()
     build_factory.addStep(steps.Git(
@@ -79,13 +100,7 @@ def setup(cfg):
     ))
     build_factory.addStep(steps.ShellCommand(
         name='build cvmfs',
-        command=[
-            'python', 'builders/build.py',
-            '--src', 'icecube.opensciencegrid.org',
-            '--dest', '/cvmfs/icecube.opensciencegrid.org',
-            '--variant', util.Property('variant'),
-            '--svnup', 'False',
-        ],
+        command=makeCommand,
         env={
             'CPUS': util.Property('CPUS', default='1'),
             'MEMORY': util.Property('MEMORY', default='1'),
@@ -106,14 +121,7 @@ def setup(cfg):
     ))
     svn_factory.addStep(steps.ShellCommand(
         name='svn checkout',
-        command=[
-            'python', 'builders/build.py',
-            '--src', 'icecube.opensciencegrid.org',
-            '--dest', '/cvmfs/icecube.opensciencegrid.org',
-            '--variant', util.Property('variant'),
-            '--svnup', 'True',
-            '--svnonly', 'True',
-        ],
+        command=makeCommand,
         env={
             'CPUS': util.Property('CPUS', default='1'),
             'MEMORY': util.Property('MEMORY', default='1'),
@@ -127,7 +135,21 @@ def setup(cfg):
     svn_factory.addStep(steps.Trigger(schedulerNames=[prefix+'-build'],
         waitForFinish=True,
         updateSourceStamp=True,
-        set_properties={ 'variant' : util.Property('variant') }
+        set_properties={
+            'variant': util.Property('variant'),
+            'nightly': util.Property('nightly'),
+            'svnonly': False,
+        }
+    ))
+    @util.renderer
+    def translate_variant_to_path(props):
+        variant = str(props.getProperty('variant'))
+        return '-'.join(variant.split('_')[:2])
+    svn_factory.addStep(steps.Trigger(schedulerNames=['publish-trigger'],
+        waitForFinish=True,
+        set_properties={
+            'variant': translate_variant_to_path,
+        }
     ))
 
     builders = []
@@ -142,7 +164,7 @@ def setup(cfg):
 
     cfg['builders']['svn_builder'] = util.BuilderConfig(
         name='svn_builder',
-        workername=list(worker_cfgs.keys())[0],
+        workername='cvmfs-centos7-build',
         factory=svn_factory,
         properties={},
     )
@@ -156,7 +178,7 @@ def setup(cfg):
             change_filter=util.ChangeFilter(category=prefix),
             treeStableTimer=None,
             builderNames=['svn_builder'],
-            properties={'variant':v},
+            properties={'variant':v, 'svnonly':True, 'nightly':False},
         )
     cfg['schedulers'][prefix+'-triggerable'] = schedulers.Triggerable(
         name=prefix+"-build",
@@ -169,13 +191,17 @@ def setup(cfg):
             util.StringParameter(name="variant",
                                  label="Variant:",
                                  default="", size=80),
+            util.BooleanParameter(name="nightly",
+                                  label="Nightly build",
+                                  default=False),
+            util.FixedParameter(name="svnonly", default="True"),
         ],
     )
 
     cfg['schedulers'][prefix+'-nightly'] = schedulers.Nightly(
         name=prefix+'-nightly',
         builderNames=['svn_builder'],
-        properties={'variant':'py2_v3_metaproject'},
+        properties={'variant':'py2_v3_metaproject', 'svnonly': True, 'nightly':True},
         hour=0, minute=0,
     )
 

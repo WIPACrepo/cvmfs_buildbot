@@ -61,9 +61,9 @@ def setup(cfg):
     """
 
     def BuildFailed(step):
-        return step.build.result == FAILURE
+        return step.build.results == FAILURE
     def BuildPassed(step):
-        return step.build.result == SUCCESS
+        return step.build.results == SUCCESS
 
     factory = util.BuildFactory()
     factory.addStep(steps.ShellCommand(
@@ -75,8 +75,8 @@ def setup(cfg):
         name='rsync',
         command=[
             'cvmfs_rsync','-ai','--delete',
-            util.Interpolate('/cvmfs-source/icecube.opensciencegrid.org/$(prop:variant)s'),
-            util.Interpolate('/cvmfs/icecube.opensciencegrid.org/$(prop:variant)s'),
+            util.Interpolate('/cvmfs-source/icecube.opensciencegrid.org/%(prop:variant)s'),
+            '/cvmfs/icecube.opensciencegrid.org/',
         ],
         timeout=7200, # 2 hours
         haltOnFailure=True,
@@ -85,6 +85,7 @@ def setup(cfg):
     factory.addStep(steps.ShellCommand(
         name='publish transaction',
         command=['cvmfs_server','publish','icecube.opensciencegrid.org'],
+        timeout=7200, # 2 hours
         haltOnFailure=True,
         doStepIf=BuildPassed,
         hideStepIf=lambda results, s: results==SKIPPED,
@@ -92,6 +93,7 @@ def setup(cfg):
     factory.addStep(steps.ShellCommand(
         name='abort transaction',
         command=['cvmfs_server','abort','-f','icecube.opensciencegrid.org'],
+        alwaysRun=True,
         haltOnFailure=True,
         doStepIf=BuildFailed,
         hideStepIf=lambda results, s: results==SKIPPED,
@@ -144,14 +146,18 @@ def setup(cfg):
 
     ####### SCHEDULERS
 
-    cfg['schedulers'][prefix+'-force'] = schedulers.ForceScheduler(
-        name="publish",
+    cfg['schedulers']['publish-force'] = schedulers.ForceScheduler(
+        name="publish-force",
         builderNames=[prefix+'_builder'],
         properties=[
             util.StringParameter(name="variant",
                                  label="Variant:",
                                  default="", size=80),
         ],
+    )
+    cfg['schedulers']['publish-trigger'] = schedulers.Triggerable(
+        name="publish-trigger",
+        builderNames=[prefix+'_builder'],
     )
 
     # update the whitelist every day at 3am
