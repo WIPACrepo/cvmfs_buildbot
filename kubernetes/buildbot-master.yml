@@ -47,10 +47,19 @@ spec:
           initialDelaySeconds: 120
           periodSeconds: 10
         ports:
-        - containerPort: 8010
-          name: cvmfs-build
-          protocol: TCP
         - containerPort: 9989
+          protocol: TCP
+      - name: buildbot-nginx
+        image: nginx:1.13-alpine
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: cvmfs-buildbot-nginx-config
+          mountPath: /etc/nginx/conf.d/
+        - name: cvmfs-buildbot-secrets
+          mountPath: /opt/
+        ports:
+        - containerPort: 443
+          name: https
           protocol: TCP
       volumes:
       - name: cvmfs-buildbot-master-config
@@ -59,3 +68,19 @@ spec:
       - name: cvmfs-buildbot-master-config-d
         configMap:
           name: cvmfs-buildbot-master-cfg-d
+      - name: cvmfs-buildbot-nginx-config
+        configMap:
+          name: cvmfs-buildbot-nginx-cfg
+          items:
+          - key: nginx.conf
+            path: nginx.conf
+      - name: cvmfs-buildbot-secrets
+        secret:
+          secretName: cvmfs-buildbot
+          items:
+          - key: htaccess
+            path: .htaccess
+          - key: sslcert
+            path: server.crt
+          - key: sslkey
+            path: server.key
