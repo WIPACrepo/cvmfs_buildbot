@@ -9,7 +9,7 @@ LABEL description="IceCube - CVMFS buildbot worker with devel packages running c
       gpus="0" \
       organization="icecube-buildbot" \
       name="worker-cvmfs-centos6-build" \
-      version="0.1.13"
+      version="0.1.14"
 
 COPY buildbot.tac /buildbot/buildbot.tac
 
@@ -25,7 +25,7 @@ RUN \
         libXrandr-devel libXt-devel freeglut-devel libffi-devel \
         file which && \
     yum -y install python27 devtoolset-2-gcc devtoolset-2-gcc-c++ \
-        devtoolset-2-gcc-gfortran && \
+        devtoolset-2-gcc-gfortran devtoolset-2-binutils && \
     yum clean all && \
     curl "https://bootstrap.pypa.io/get-pip.py" | python && \
     pip --no-cache-dir install dumb-init && \
