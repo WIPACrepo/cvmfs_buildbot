@@ -20,7 +20,7 @@ spec:
         imagePullPolicy: Always
         env:
         - name: BUILDBOT_MASTER_URL
-          value: localhost
+          value: https://cvmfs-buildbot.icecube.wisc.edu/
         - name: WORKER_PASSWORD
           valueFrom:
             secretKeyRef:
