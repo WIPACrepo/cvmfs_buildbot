@@ -105,8 +105,10 @@ def setup(cfg):
         factory=factory,
         properties={},
         locks=[
-            cfg.locks['cvmfs_shared'].access('exclusive')
+            cfg.locks['cvmfs_shared'].access('exclusive'),
+            cfg.locks['cvmfs_publish'].access('exclusive')
         ],
+        collapseRequests=True,
     )
     
     factory_whitelist = util.BuildFactory()
@@ -122,8 +124,54 @@ def setup(cfg):
         factory=factory_whitelist,
         properties={},
         locks=[
-            cfg.locks['cvmfs_shared'].access('exclusive')
+            cfg.locks['cvmfs_publish'].access('exclusive')
         ],
+        collapseRequests=True,
+    )
+    
+    factory_user_rsync = util.BuildFactory()
+    factory_user_rsync.addStep(steps.ShellCommand(
+        name='open transaction',
+        command=['cvmfs_server','transaction','icecube.opensciencegrid.org'],
+        haltOnFailure=True,
+    ))
+    factory_user_rsync.addStep(steps.ShellCommand(
+        name='rsync',
+        command=[
+            'cvmfs_rsync','-ai','--delete',
+            'rsync://nfs-6.icecube.wisc.edu/pcvmfs/',
+            '/cvmfs/icecube.opensciencegrid.org/users/',
+        ],
+        timeout=7200, # 2 hours
+        haltOnFailure=True,
+        doStepIf=BuildPassed,
+    ))
+    factory_user_rsync.addStep(steps.ShellCommand(
+        name='publish transaction',
+        command=['cvmfs_server','publish','icecube.opensciencegrid.org'],
+        timeout=7200, # 2 hours
+        haltOnFailure=True,
+        doStepIf=BuildPassed,
+        hideStepIf=lambda results, s: results==SKIPPED,
+    ))
+    factory_user_rsync.addStep(steps.ShellCommand(
+        name='abort transaction',
+        command=['cvmfs_server','abort','-f','icecube.opensciencegrid.org'],
+        alwaysRun=True,
+        haltOnFailure=True,
+        doStepIf=BuildFailed,
+        hideStepIf=lambda results, s: results==SKIPPED,
+    ))
+
+    cfg['builders'][prefix+'_user_rsync'] = util.BuilderConfig(
+        name=prefix+'_user_rsync',
+        workername=workername,
+        factory=factory_user_rsync,
+        properties={},
+        locks=[
+            cfg.locks['cvmfs_publish'].access('exclusive')
+        ],
+        collapseRequests=True,
     )
 
     factory_backup = util.BuildFactory()
@@ -142,6 +190,7 @@ def setup(cfg):
         locks=[
             cfg.locks['cvmfs_shared'].access('exclusive')
         ],
+        collapseRequests=True,
     )
 
     ####### SCHEDULERS
@@ -167,6 +216,13 @@ def setup(cfg):
         hour=3, minute=0,
     )
 
+    # update the user cvmfs space every hour on the hour
+    cfg['schedulers'][prefix+'-user_rsync'] = schedulers.Nightly(
+        name="user cvmfs",
+        builderNames=[prefix+'_user_rsync'],
+        minute=0,
+    )
+
     # backup cvmfs the first day of every month, at 4am
     cfg['schedulers'][prefix+'-backup'] = schedulers.Nightly(
         name="backup",
@@ -177,3 +233,4 @@ def setup(cfg):
 
 config = Config(setup)
 config.locks['cvmfs_shared'] = util.MasterLock('cvmfs_lock', maxCount=100)
+config.locks['cvmfs_publish'] = util.MasterLock('cvmfs_publish', maxCount=1)
