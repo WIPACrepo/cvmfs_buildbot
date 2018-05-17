@@ -37,8 +37,10 @@ with open(path,'w') as f:
             parts = l.split('=',1)
             k = parts[0].strip()
             if k in newdata:
-                l = k+'='+newdata[k]
+                continue
         f.write(l+'\n')
+    for k in newdata:
+        f.write(k+'='+newdata[k]+'\n')
 EOF
 else
     rm -rf /etc/cvmfs/repositories.d/$REPO

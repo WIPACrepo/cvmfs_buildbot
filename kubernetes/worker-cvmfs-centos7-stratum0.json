@@ -52,7 +52,7 @@
                                 }
                             }
                         ],
-                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-stratum0:0.1.26",
+                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-stratum0:0.1.27",
                         "imagePullPolicy": "Always",
                         "name": "worker-cvmfs-centos7-stratum0",
                         "ports": [

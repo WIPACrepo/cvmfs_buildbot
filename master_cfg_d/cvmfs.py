@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import os
 import json
+import random
 
 from buildbot.plugins import *
 from buildbot.process.buildstep import SUCCESS,SKIPPED
@@ -92,6 +93,11 @@ def setup(cfg):
         return command
 
     build_factory = util.BuildFactory()
+    build_factory.addStep(steps.ShellCommand(
+        name='random sleep',
+        hideStepIf=lambda results,s:True,
+        command=['sleep',random.randint(1,30)],
+    ))
     build_factory.addStep(steps.Git(
         repourl='git://github.com/WIPACrepo/cvmfs.git',
         mode='full',
@@ -103,7 +109,7 @@ def setup(cfg):
         command=makeCommand,
         env={
             'CPUS': util.Property('CPUS', default='1'),
-            'MEMORY': util.Property('MEMORY', default='1'),
+#            'MEMORY': util.Property('MEMORY', default='1'),
         },
         workdir='build',
         haltOnFailure=True,
@@ -111,6 +117,10 @@ def setup(cfg):
             cfg.locks['cvmfs_shared'].access('counting')
         ],
     ))
+
+    @util.renderer
+    def isMetaproject(props):
+        return 'meta' in props.getProperty('variant',default='')
 
     svn_factory = util.BuildFactory()
     svn_factory.addStep(steps.Git(
@@ -124,17 +134,19 @@ def setup(cfg):
         command=makeCommand,
         env={
             'CPUS': util.Property('CPUS', default='1'),
-            'MEMORY': util.Property('MEMORY', default='1'),
+#            'MEMORY': util.Property('MEMORY', default='1'),
         },
         workdir='build',
         haltOnFailure=True,
         locks=[
             cfg.locks['cvmfs_shared'].access('exclusive')
         ],
+        doStepIf=isMetaproject,
     ))
     svn_factory.addStep(steps.Trigger(schedulerNames=[prefix+'-build'],
         waitForFinish=True,
         updateSourceStamp=True,
+        haltOnFailure=True,
         set_properties={
             'variant': util.Property('variant'),
             'nightly': util.Property('nightly'),
@@ -143,8 +155,8 @@ def setup(cfg):
     ))
     @util.renderer
     def translate_variant_to_path(props):
-        variant = str(props.getProperty('variant'))
-        return '-'.join(variant.split('_')[:2])
+        variant = str(props.getProperty('variant')).split('_')[:-1]
+        return variant[0]+'-'+'.'.join(variant[1:])
     svn_factory.addStep(steps.Trigger(schedulerNames=['publish-trigger'],
         waitForFinish=True,
         set_properties={
@@ -171,7 +183,7 @@ def setup(cfg):
 
     ####### SCHEDULERS
 
-    variants = ['py2_v3_base','py2_v3_metaproject','iceprod']
+    variants = ['py2_v3.0.1_base','py2_v3.0.1_metaproject','iceprod']
     for v in variants:
         cfg['schedulers'][prefix+'-'+v] = schedulers.SingleBranchScheduler(
             name=prefix+'-'+v,
@@ -201,7 +213,7 @@ def setup(cfg):
     cfg['schedulers'][prefix+'-nightly'] = schedulers.Nightly(
         name=prefix+'-nightly',
         builderNames=['svn_builder'],
-        properties={'variant':'py2_v3_metaproject', 'svnonly': True, 'nightly':True},
+        properties={'variant':'py2_v3_0_1_metaproject', 'svnonly': True, 'nightly':True},
         hour=0, minute=0,
     )
 

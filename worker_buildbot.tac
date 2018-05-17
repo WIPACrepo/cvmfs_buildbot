@@ -36,12 +36,11 @@ maxretries = 100
 numcpus = None
 allow_shutdown = None
 
-blacklist = ['WORKERPASS']
-if 'WORKER_ENVIRONMENT_BLACKLIST' in os.environ:
-    blacklist.extend(os.environ['WORKER_ENVIRONMENT_BLACKLIST'].split(';'))
-for bl in blacklist:
-    if bl in os.environ:
-        del os.environ[bl]
+whitelist = ['PATH','LD_LIBRARY_PATH','PYTHONPATH','MANPATH','PERL5LIB','PKG_CONFIG_PATH',
+             'PCP_DIR','XDG_DATA_DIRS','X_SCLS','USER','SHELL','HOME','PWD','HOSTNAME']
+for k in list(os.environ):
+    if k not in whitelist:
+        del os.environ[k]
 
 s = Worker(buildmaster_host, port, workername, passwd, basedir,
            keepalive, umask=umask, maxdelay=maxdelay,

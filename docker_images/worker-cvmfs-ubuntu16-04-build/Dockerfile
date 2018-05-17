@@ -9,7 +9,7 @@ LABEL description="IceCube - CVMFS buildbot worker with devel packages running u
       gpus="0" \
       organization="icecube-buildbot" \
       name="worker-cvmfs-ubuntu16-04-build" \
-      version="0.1.7"
+      version="0.1.10"
 
 COPY buildbot.tac /buildbot/buildbot.tac
 

@@ -9,7 +9,7 @@ LABEL description="IceCube - CVMFS buildbot worker with devel packages running c
       gpus="0" \
       organization="icecube-buildbot" \
       name="worker-cvmfs-centos7-build" \
-      version="0.1.5"
+      version="0.1.6"
 
 COPY buildbot.tac /buildbot/buildbot.tac
 
