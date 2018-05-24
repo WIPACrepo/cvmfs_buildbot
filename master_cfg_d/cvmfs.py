@@ -18,6 +18,7 @@ worker_cfgs = {
     'cvmfs-ubuntu14-04-build': 'worker-cvmfs-ubuntu14-04-build',
     'cvmfs-ubuntu15-10-build': 'worker-cvmfs-ubuntu15-10-build',
     'cvmfs-ubuntu16-04-build': 'worker-cvmfs-ubuntu16-04-build',
+    'cvmfs-ubuntu18-04-build': 'worker-cvmfs-ubuntu18-04-build',
 }
 
 def setup(cfg):
