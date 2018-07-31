@@ -9,7 +9,7 @@ LABEL description="IceCube - CVMFS buildbot worker with devel packages running c
       gpus="0" \
       organization="icecube-buildbot" \
       name="worker-cvmfs-centos6-build" \
-      version="0.1.15"
+      version="0.1.16"
 
 COPY buildbot.tac /buildbot/buildbot.tac
 
@@ -23,7 +23,7 @@ RUN \
         ncurses-devel readline-devel libXext-devel libXi-devel \
         libXfixes-devel libXft-devel libXmu-devel libXpm-devel \
         libXrandr-devel libXt-devel freeglut-devel libffi-devel \
-        file which && \
+        file which xz && \
     yum -y install python27 devtoolset-2-gcc devtoolset-2-gcc-c++ \
         devtoolset-2-gcc-gfortran devtoolset-2-binutils && \
     yum clean all && \

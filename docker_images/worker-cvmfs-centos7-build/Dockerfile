@@ -9,20 +9,20 @@ LABEL description="IceCube - CVMFS buildbot worker with devel packages running c
       gpus="0" \
       organization="icecube-buildbot" \
       name="worker-cvmfs-centos7-build" \
-      version="0.1.6"
+      version="0.1.8"
 
 COPY buildbot.tac /buildbot/buildbot.tac
 
 RUN \
     yum clean all && \
     yum -y install gcc gcc-c++ gcc-gfortran autoconf automake make \
-        m4 bison flex \
+        m4 bison flex libstdc++-static \
         libtool patch binutils unzip git subversion wget curl \
         libpng-devel openssl-devel libX11-devel bzip2-devel \
         ncurses-devel readline-devel libXext-devel libXi-devel \
         libXfixes-devel libXft-devel libXmu-devel libXpm-devel \
         libXrandr-devel libXt-devel freeglut-devel libffi-devel \
-        file which python-devel && \
+        file which python-devel bzip2 && \
     yum clean all && \
     curl "https://bootstrap.pypa.io/get-pip.py" | python && \
     pip --no-cache-dir install dumb-init 'twisted[tls]' buildbot-worker && \

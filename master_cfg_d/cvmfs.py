@@ -92,6 +92,16 @@ def setup(cfg):
         if props.getProperty('nightly'):
             command.append(['--nightly'])
         return command
+    
+    @util.renderer
+    def makeCommandSpack(props):
+        command = [
+            'python', 'spack/build.py',
+            '--src', 'icecube.opensciencegrid.org',
+            '--dest', '/cvmfs/icecube.opensciencegrid.org',
+            props.getProperty('variant'),
+        ]
+        return command
 
     build_factory = util.BuildFactory()
     build_factory.addStep(steps.ShellCommand(
@@ -108,6 +118,33 @@ def setup(cfg):
     build_factory.addStep(steps.ShellCommand(
         name='build cvmfs',
         command=makeCommand,
+        env={
+            'CPUS': util.Property('CPUS', default='1'),
+#            'MEMORY': util.Property('MEMORY', default='1'),
+        },
+        workdir='build',
+        haltOnFailure=True,
+        locks=[
+            cfg.locks['cvmfs_shared'].access('counting')
+        ],
+    ))
+    
+
+    build_factory_spack = util.BuildFactory()
+    build_factory_spack.addStep(steps.ShellCommand(
+        name='random sleep',
+        hideStepIf=lambda results,s:True,
+        command=['sleep',random.randint(1,30)],
+    ))
+    build_factory_spack.addStep(steps.Git(
+        repourl='git://github.com/WIPACrepo/cvmfs.git',
+        mode='full',
+        method='clobber',
+        workdir='build',
+    ))
+    build_factory_spack.addStep(steps.ShellCommand(
+        name='build cvmfs',
+        command=makeCommandSpack,
         env={
             'CPUS': util.Property('CPUS', default='1'),
 #            'MEMORY': util.Property('MEMORY', default='1'),
@@ -164,6 +201,48 @@ def setup(cfg):
             'variant': translate_variant_to_path,
         }
     ))
+    
+    spack_master = util.BuildFactory()
+    spack_master.addStep(steps.Git(
+        repourl='git://github.com/WIPACrepo/cvmfs.git',
+        mode='full',
+        method='clobber',
+        workdir='build',
+    ))
+    spack_master.addStep(steps.ShellCommand(
+        name='svn checkout',
+        command=makeCommandSpack,
+        env={
+            'CPUS': util.Property('CPUS', default='1'),
+#            'MEMORY': util.Property('MEMORY', default='1'),
+        },
+        workdir='build',
+        haltOnFailure=True,
+        locks=[
+            cfg.locks['cvmfs_shared'].access('exclusive')
+        ],
+        doStepIf=isMetaproject,
+        timeout=3600*4, # 4 hours - some packages take a long time to build
+    ))
+    spack_master.addStep(steps.Trigger(schedulerNames=[prefix+'-build-spack'],
+        waitForFinish=True,
+        updateSourceStamp=True,
+        haltOnFailure=True,
+        set_properties={
+            'variant': util.Property('variant'),
+            'nightly': util.Property('nightly'),
+            'svnonly': False,
+        }
+    ))
+    @util.renderer
+    def translate_variant_to_path_spack(props):
+        return str(props.getProperty('variant')).replace('-meta','')
+    spack_master.addStep(steps.Trigger(schedulerNames=['publish-trigger'],
+        waitForFinish=True,
+        set_properties={
+            'variant': translate_variant_to_path_spack,
+        }
+    ))
 
     builders = []
     for name in worker_cfgs:
@@ -175,10 +254,27 @@ def setup(cfg):
         )
         builders.append(name+'_builder')
 
+    builders_spack = []
+    for name in worker_cfgs:
+        cfg['builders'][name+'_builder_spack'] = util.BuilderConfig(
+            name=name+'_builder_spack',
+            workername=name,
+            factory=build_factory_spack,
+            properties={},
+        )
+        builders_spack.append(name+'_builder_spack')
+
     cfg['builders']['svn_builder'] = util.BuilderConfig(
         name='svn_builder',
-        workername='cvmfs-centos7-build',
+        workername='cvmfs-ubuntu18-04-build',
         factory=svn_factory,
+        properties={},
+    )
+
+    cfg['builders']['svn_builder_spack'] = util.BuilderConfig(
+        name='svn_builder_spack',
+        workername='cvmfs-ubuntu18-04-build',
+        factory=spack_master,
         properties={},
     )
 
@@ -197,9 +293,26 @@ def setup(cfg):
         name=prefix+"-build",
         builderNames=builders,
     )
+    cfg['schedulers'][prefix+'-triggerable-spack'] = schedulers.Triggerable(
+        name=prefix+"-build-spack",
+        builderNames=builders_spack,
+    )
     cfg['schedulers'][prefix+'-force'] = schedulers.ForceScheduler(
         name=prefix+"-force",
         builderNames=['svn_builder'],
+        properties=[
+            util.StringParameter(name="variant",
+                                 label="Variant:",
+                                 default="", size=80),
+            util.BooleanParameter(name="nightly",
+                                  label="Nightly build",
+                                  default=False),
+            util.FixedParameter(name="svnonly", default="True"),
+        ],
+    )
+    cfg['schedulers'][prefix+'-force-spack'] = schedulers.ForceScheduler(
+        name=prefix+"-force-spack",
+        builderNames=['svn_builder_spack'],
         properties=[
             util.StringParameter(name="variant",
                                  label="Variant:",
