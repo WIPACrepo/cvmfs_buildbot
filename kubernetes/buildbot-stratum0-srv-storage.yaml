@@ -5,8 +5,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  #persistentVolumeReclaimPolicy: Retain
   storageClassName: rbd-k8s
   resources:
     requests:
-      storage: 200Gi
+      storage: 400Gi

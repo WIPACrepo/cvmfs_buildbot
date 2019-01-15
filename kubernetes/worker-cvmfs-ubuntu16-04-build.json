@@ -74,13 +74,13 @@
                     {
                         "cephfs": {
                             "monitors": [
-				"10.128.11.206",
-				"10.128.11.207",
-				"10.128.11.208",
-				"10.128.11.209",
-				"10.128.11.210"
+                                "10.128.11.206",
+                                "10.128.11.207",
+                                "10.128.11.208",
+                                "10.128.11.209",
+                                "10.128.11.210"
                             ],
-                            "path": "/cvmfs",
+                            "path": "/k8s/buildbot-worker/cvmfs-buildbot-worker-shared-storage",
                             "secretRef": {
                                 "name": "cephfs-secret"
                             },

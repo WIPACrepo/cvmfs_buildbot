@@ -97,3 +97,7 @@ cvmfs_config
 srv
 
 kubernetes/*secrets*.yml
+
+# vi swap files
+*.swp
+*.swo

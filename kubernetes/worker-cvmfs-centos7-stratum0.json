@@ -109,13 +109,13 @@
                     {
                         "cephfs": {
                             "monitors": [
-				"10.128.11.206",
-				"10.128.11.207",
-				"10.128.11.208",
-				"10.128.11.209",
-				"10.128.11.210"
+                                "10.128.11.206",
+                                "10.128.11.207",
+                                "10.128.11.208",
+                                "10.128.11.209",
+                                "10.128.11.210"
                             ],
-                            "path": "/cvmfs",
+                            "path": "/k8s/buildbot-worker/cvmfs-buildbot-worker-shared-storage",
                             "secretRef": {
                                 "name": "cephfs-secret"
                             },
@@ -132,7 +132,7 @@
                     {
                         "name": "cvmfs-buildbot-stratum0-tmp-storage",
                         "persistentVolumeClaim": {
-                            "claimName": "cvmfs-buildbot-stratum0-spool-pv-claim2"
+                            "claimName": "cvmfs-buildbot-stratum0-spool-pv-claim"
                         }
                     },
                     {
