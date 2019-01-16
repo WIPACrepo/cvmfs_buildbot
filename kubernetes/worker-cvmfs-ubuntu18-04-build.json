@@ -1,0 +1,95 @@
+{
+    "apiVersion": "apps/v1beta1",
+    "kind": "Deployment",
+    "metadata": {
+        "labels": {
+            "app": "buildbot-worker",
+            "name": "worker-cvmfs-ubuntu18-04-build"
+        },
+        "name": "worker-cvmfs-ubuntu18-04-build"
+    },
+    "spec": {
+        "replicas": 1,
+        "selector": {
+            "matchLabels": {
+                "app": "buildbot-worker",
+                "name": "worker-cvmfs-ubuntu18-04-build"
+            }
+        },
+        "strategy": {
+            "type": "Recreate"
+        },
+        "template": {
+            "metadata": {
+                "labels": {
+                    "app": "buildbot-worker",
+                    "name": "worker-cvmfs-ubuntu18-04-build"
+                }
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "env": [
+                            {
+                                "name": "BUILDMASTER",
+                                "value": "cvmfs-buildbot-worker"
+                            },
+                            {
+                                "name": "BUILDMASTER_PORT",
+                                "value": "9989"
+                            },
+                            {
+                                "name": "WORKERNAME",
+                                "value": "cvmfs-ubuntu18-04-build"
+                            },
+                            {
+                                "name": "WORKERPASS",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "worker_password",
+                                        "name": "cvmfs-buildbot"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-ubuntu18-04-build:0.1.10",
+                        "imagePullPolicy": "Always",
+                        "name": "worker-cvmfs-ubuntu18-04-build",
+                        "ports": [],
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "8000Mi"
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/cvmfs",
+                                "name": "cvmfs-buildbot-worker-shared-storage"
+                            }
+                        ]
+                    }
+                ],
+                "volumes": [
+                    {
+                        "cephfs": {
+                            "monitors": [
+                                "10.128.11.206",
+                                "10.128.11.207",
+                                "10.128.11.208",
+                                "10.128.11.209",
+                                "10.128.11.210"
+                            ],
+                            "path": "/k8s/buildbot-worker/cvmfs-buildbot-worker-shared-storage",
+                            "secretRef": {
+                                "name": "cephfs-secret"
+                            },
+                            "user": "k8s"
+                        },
+                        "name": "cvmfs-buildbot-worker-shared-storage"
+                    }
+                ]
+            }
+        }
+    }
+}
