@@ -52,7 +52,7 @@
                                 }
                             }
                         ],
-                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos6-build:0.1.16",
+                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos6-build:0.1.17",
                         "imagePullPolicy": "Always",
                         "name": "worker-cvmfs-centos6-build",
                         "ports": [],

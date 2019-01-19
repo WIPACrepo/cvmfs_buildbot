@@ -208,11 +208,11 @@ def make_workers():
                             'volumes': [{
                                 'name': 'cvmfs-buildbot-worker-shared-storage',
                                 'cephfs':{
-                                    'monitors': ['10.254.81.20:6790','10.254.109.34:6790','10.254.34.31:6790'],
-                                    'path': '/cvmfs',
-                                    'user': 'admin',
+                                    'monitors': ['10.128.11.206','10.128.11.207','10.128.11.208','10.128.11.209','10.128.11.210'],
+                                    'path': '/k8s/buildbot-worker/cvmfs-buildbot-worker-shared-storage',
+                                    'user': 'k8s',
                                     'secretRef': {
-                                        'name': 'rook-admin'
+                                        'name': 'cephfs-secret'
                                     },
                                 },
                             }],

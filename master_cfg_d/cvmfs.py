@@ -194,6 +194,8 @@ def setup(cfg):
     @util.renderer
     def translate_variant_to_path(props):
         variant = str(props.getProperty('variant')).split('_')[:-1]
+        if len(variant) < 2:
+            return variant[0]
         return variant[0]+'-'+'.'.join(variant[1:])
     svn_factory.addStep(steps.Trigger(schedulerNames=['publish-trigger'],
         waitForFinish=True,
@@ -256,6 +258,8 @@ def setup(cfg):
 
     builders_spack = []
     for name in worker_cfgs:
+        if 'ubuntu14' in name:
+            continue
         cfg['builders'][name+'_builder_spack'] = util.BuilderConfig(
             name=name+'_builder_spack',
             workername=name,

@@ -52,7 +52,7 @@
                                 }
                             }
                         ],
-                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-ubuntu16-04-build:0.1.10",
+                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-ubuntu16-04-build:0.1.11",
                         "imagePullPolicy": "Always",
                         "name": "worker-cvmfs-ubuntu16-04-build",
                         "ports": [],

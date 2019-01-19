@@ -9,7 +9,7 @@ LABEL description="IceCube - CVMFS buildbot worker with devel packages running u
       gpus="0" \
       organization="icecube-buildbot" \
       name="worker-cvmfs-ubuntu16-04-build" \
-      version="0.1.10"
+      version="0.1.11"
 
 COPY buildbot.tac /buildbot/buildbot.tac
 
@@ -20,7 +20,7 @@ RUN \
         libtool patch binutils unzip git subversion wget curl \
         libpng-dev libssl-dev libx11-dev zlib1g-dev libbz2-dev \
         libncurses5-dev libreadline-dev freeglut3-dev libffi-dev \
-        file python-dev && \
+        file python-dev libxml2-dev && \
     apt-get -y clean && \
     curl "https://bootstrap.pypa.io/get-pip.py" | python && \
     pip --no-cache-dir install dumb-init 'twisted[tls]' buildbot-worker && \
