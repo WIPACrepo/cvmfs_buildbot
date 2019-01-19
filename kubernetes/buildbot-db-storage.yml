@@ -5,8 +5,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  #persistentVolumeReclaimPolicy: Retain
-  storageClassName: rook-block
+  storageClassName: rbd-k8s
   resources:
     requests:
-      storage: 10Gi
+      storage: 12Gi

@@ -1,8 +1,8 @@
-# iceprod_buildbot/worker-cvmfs-ubuntu16-04-build
+# iceprod_buildbot/worker-cvmfs-ubuntu18-04-build
 
 FROM ubuntu:18.04
 
-LABEL description="IceCube - CVMFS buildbot worker with devel packages running ubuntu:16.04" \
+LABEL description="IceCube - CVMFS buildbot worker with devel packages running ubuntu:18.04" \
       mounts="cvmfs" \
       cpus="4" \
       memory="8000" \

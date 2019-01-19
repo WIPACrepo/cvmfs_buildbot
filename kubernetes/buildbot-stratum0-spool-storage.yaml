@@ -1,12 +1,11 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: cvmfs-buildbot-stratum0-spool-pv-claim2
+  name: cvmfs-buildbot-stratum0-spool-pv-claim
 spec:
   accessModes:
     - ReadWriteOnce
-  #persistentVolumeReclaimPolicy: Retain
-  storageClassName: rook-block
+  storageClassName: rbd-k8s
   resources:
     requests:
-      storage: 120Gi
+      storage: 400Gi
