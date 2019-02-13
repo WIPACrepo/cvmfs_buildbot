@@ -238,7 +238,8 @@ def setup(cfg):
     ))
     @util.renderer
     def translate_variant_to_path_spack(props):
-        return str(props.getProperty('variant')).replace('-meta','')
+        variant = str(props.getProperty('variant')).replace('-meta','')
+        return variant
     spack_master.addStep(steps.Trigger(schedulerNames=['publish-trigger'],
         waitForFinish=True,
         set_properties={

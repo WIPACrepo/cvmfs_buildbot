@@ -71,13 +71,20 @@ def setup(cfg):
         command=['cvmfs_server','transaction','icecube.opensciencegrid.org'],
         haltOnFailure=True,
     ))
+    @util.renderer
+    def makeCommandRsync(props):
+        src_path = os.path.join('icecube.opensciencegrid.org',
+                                str(props.getProperty('variant')))
+        dest_path = os.path.dirname(src_path)
+        command = [
+            'cvmfs_rsync','-ai','--delete',
+            os.path.join('/cvmfs-source',src_path),
+            os.path.join('/cvmfs',dest_path)+'/',
+        ]
+        return command
     factory.addStep(steps.ShellCommand(
         name='rsync',
-        command=[
-            'cvmfs_rsync','-ai','--delete',
-            util.Interpolate('/cvmfs-source/icecube.opensciencegrid.org/%(prop:variant)s'),
-            '/cvmfs/icecube.opensciencegrid.org/',
-        ],
+        command=makeCommandRsync,
         timeout=7200, # 2 hours
         haltOnFailure=True,
         doStepIf=BuildPassed,

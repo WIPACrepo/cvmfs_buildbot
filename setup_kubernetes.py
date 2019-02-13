@@ -269,7 +269,7 @@ def make_workers():
                     {
                         'name': 'cvmfs-buildbot-stratum0-tmp-storage',
                         'persistentVolumeClaim':{
-                            'claimName': 'cvmfs-buildbot-stratum0-spool-pv-claim2',
+                            'claimName': 'cvmfs-buildbot-stratum0-spool-pv-claim',
                         },
                     },
                     {
