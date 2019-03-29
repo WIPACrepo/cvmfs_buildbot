@@ -9,7 +9,7 @@ LABEL description="IceCube - CVMFS buildbot worker running centos:7" \
       gpus="0" \
       organization="icecube-buildbot" \
       name="worker-cvmfs-centos7-stratum0" \
-      version="0.1.27"
+      version="0.1.28"
 
 COPY buildbot.tac /buildbot/buildbot.tac
 COPY stratum0-start.sh /buildbot/stratum0-start.sh
@@ -24,6 +24,10 @@ RUN \
     yum -y install https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest.noarch.rpm && \
     yum -y install cvmfs cvmfs-server && \
     yum clean all && \
+    wget "https://download.samba.org/pub/rsync/src/rsync-3.1.3.tar.gz" && \
+    tar -zxf rsync-3.1.3.tar.gz && \
+    cd rsync-3.1.3 && ./configure --prefix=/usr && make && make install && \
+    cd && rm -rf rsync* && \
     mkdir /cvmfs-source && \
     curl "https://bootstrap.pypa.io/get-pip.py" | python && \
     pip --no-cache-dir install dumb-init 'twisted[tls]' buildbot-worker && \
