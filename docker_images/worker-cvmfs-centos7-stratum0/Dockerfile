@@ -4,12 +4,12 @@ FROM centos:7
 
 LABEL description="IceCube - CVMFS buildbot worker running centos:7" \
       mounts="cvmfs" \
-      cpus="1" \
-      memory="6000" \
+      cpus="2" \
+      memory="12000" \
       gpus="0" \
       organization="icecube-buildbot" \
       name="worker-cvmfs-centos7-stratum0" \
-      version="0.1.28"
+      version="0.1.30"
 
 COPY buildbot.tac /buildbot/buildbot.tac
 COPY stratum0-start.sh /buildbot/stratum0-start.sh

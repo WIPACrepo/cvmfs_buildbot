@@ -332,7 +332,7 @@ def setup(cfg):
     cfg['schedulers'][prefix+'-nightly'] = schedulers.Nightly(
         name=prefix+'-nightly',
         builderNames=['svn_builder'],
-        properties={'variant':'py2_v3_0_1_metaproject', 'svnonly': True, 'nightly':True},
+        properties={'variant':'py2_v3_1_1_metaproject', 'svnonly': True, 'nightly':True},
         hour=0, minute=0,
     )
 

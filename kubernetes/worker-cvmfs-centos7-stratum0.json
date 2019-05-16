@@ -52,7 +52,7 @@
                                 }
                             }
                         ],
-                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-stratum0:0.1.28",
+                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-stratum0:0.1.29",
                         "imagePullPolicy": "Always",
                         "name": "worker-cvmfs-centos7-stratum0",
                         "ports": [
@@ -64,8 +64,8 @@
                         ],
                         "resources": {
                             "limits": {
-                                "cpu": "1",
-                                "memory": "6000Mi"
+                                "cpu": "2",
+                                "memory": "12000Mi"
                             }
                         },
                         "securityContext": {
