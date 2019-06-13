@@ -104,11 +104,6 @@ def setup(cfg):
         return command
 
     build_factory = util.BuildFactory()
-    build_factory.addStep(steps.ShellCommand(
-        name='random sleep',
-        hideStepIf=lambda results,s:True,
-        command=['sleep',random.randint(1,30)],
-    ))
     build_factory.addStep(steps.Git(
         repourl='git://github.com/WIPACrepo/cvmfs.git',
         mode='full',
@@ -131,11 +126,6 @@ def setup(cfg):
     
 
     build_factory_spack = util.BuildFactory()
-    build_factory_spack.addStep(steps.ShellCommand(
-        name='random sleep',
-        hideStepIf=lambda results,s:True,
-        command=['sleep',random.randint(1,30)],
-    ))
     build_factory_spack.addStep(steps.Git(
         repourl='git://github.com/WIPACrepo/cvmfs.git',
         mode='full',
