@@ -101,6 +101,10 @@ def setup(cfg):
             '--dest', '/cvmfs/icecube.opensciencegrid.org',
             props.getProperty('variant'),
         ]
+        if props.getProperty('svnonly'):
+            command.extend([
+                '--svnonly',
+            ])
         return command
 
     build_factory = util.BuildFactory()
@@ -228,7 +232,7 @@ def setup(cfg):
     ))
     @util.renderer
     def translate_variant_to_path_spack(props):
-        variant = str(props.getProperty('variant')).replace('-meta','')
+        variant = str(props.getProperty('variant')).replace('-metaproject','')
         return variant
     spack_master.addStep(steps.Trigger(schedulerNames=['publish-trigger'],
         waitForFinish=True,
@@ -275,7 +279,7 @@ def setup(cfg):
 
     ####### SCHEDULERS
 
-    variants = ['py2_v3.0.1_base','py2_v3.0.1_metaproject','iceprod']
+    variants = ['py2_v3.0.1_base','py2_v3.0.1_metaproject']
     for v in variants:
         cfg['schedulers'][prefix+'-'+v] = schedulers.SingleBranchScheduler(
             name=prefix+'-'+v,
@@ -324,6 +328,13 @@ def setup(cfg):
         builderNames=['svn_builder'],
         properties={'variant':'py2_v3_1_1_metaproject', 'svnonly': True, 'nightly':True},
         hour=0, minute=0,
+    )
+
+    cfg['schedulers'][prefix+'-nightly-spack'] = schedulers.Nightly(
+        name=prefix+'-nightly-spack',
+        builderNames=['svn_builder_spack'],
+        properties={'variant':'py3-v4.1.0-metaproject', 'svnonly': True, 'nightly':True},
+        hour=3, minute=0,
     )
 
 config = Config(setup)
