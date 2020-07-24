@@ -241,6 +241,73 @@ def setup(cfg):
         }
     ))
 
+    # ara
+    build_factory_ara = util.BuildFactory()
+    build_factory_ara.addStep(steps.Git(
+        repourl='git://github.com/ara-software/cvmfs.git',
+        mode='full',
+        method='clobber',
+        workdir='build',
+    ))
+    @util.renderer
+    def makeCommandARAmkdir(props):
+        path = '/cvmfs/ara.opensciencegrid.org/'+str(props.getProperty('variant'))+'/'+str(props.getProperty('os'))
+        command = 'rm -rf %s; mkdir -p %s'%(path, path)
+        return command
+    build_factory_ara.addStep(steps.ShellCommand(
+        name='mkdir',
+        command=makeCommandARAmkdir,
+        workdir='build',
+        haltOnFailure=True,
+        locks=[
+            cfg.locks['cvmfs_shared'].access('exclusive')
+        ],
+    ))
+    @util.renderer
+    def makeCommandARAcp(props):
+        command = [
+            'rsync','-ai','ara.opensciencegrid.org/'+str(props.getProperty('variant'))+'/',
+            '/cvmfs/ara.opensciencegrid.org/'+str(props.getProperty('variant'))+'/'+str(props.getProperty('os'))+'/',
+        ]
+        return command
+    build_factory_ara.addStep(steps.ShellCommand(
+        name='cp to cvmfs',
+        command=makeCommandARAcp,
+        workdir='build',
+        haltOnFailure=True,
+        locks=[
+            cfg.locks['cvmfs_shared'].access('exclusive')
+        ],
+    ))
+    @util.renderer
+    def makeCommandARAbuild(props):
+        command = [
+            'builders/'+str(props.getProperty('variant'))+'/build.sh',
+            '--dest', '/cvmfs/ara.opensciencegrid.org/'+str(props.getProperty('variant'))+'/'+str(props.getProperty('os')),
+            '--make_arg', '-j'+str(props.getProperty('CPUS', default='1')),
+        ]
+        return command
+    build_factory_ara.addStep(steps.ShellCommand(
+        name='build cvmfs',
+        command=makeCommandARAbuild,
+        workdir='build',
+        haltOnFailure=True,
+        locks=[
+            cfg.locks['cvmfs_shared'].access('counting')
+        ],
+    ))
+    @util.renderer
+    def translate_variant_to_path_ara(props):
+        variant = str(props.getProperty('variant'))+'/'+str(props.getProperty('os'))
+        return variant
+    build_factory_ara.addStep(steps.Trigger(schedulerNames=['publish-ara-trigger'],
+        waitForFinish=True,
+        set_properties={
+            'path': translate_variant_to_path_ara,
+        }
+    ))
+
+
     builders = []
     for name in worker_cfgs:
         cfg['builders'][name+'_builder'] = util.BuilderConfig(
@@ -253,7 +320,7 @@ def setup(cfg):
 
     builders_spack = []
     for name in worker_cfgs:
-        if 'ubuntu14' in name:
+        if 'ubuntu14' in name or 'ubuntu15' in name or 'ubuntu16' in name:
             continue
         cfg['builders'][name+'_builder_spack'] = util.BuilderConfig(
             name=name+'_builder_spack',
@@ -262,6 +329,15 @@ def setup(cfg):
             properties={},
         )
         builders_spack.append(name+'_builder_spack')
+        
+    builders_ara = []
+    cfg['builders']['cvmfs_builder_ara'] = util.BuilderConfig(
+        name='cvmfs_builder_ara',
+        workername='cvmfs-centos7-build',
+        factory=build_factory_ara,
+        properties={'os': 'centos7'},
+    )
+    builders_ara.append('cvmfs_builder_ara')
 
     cfg['builders']['svn_builder'] = util.BuilderConfig(
         name='svn_builder',
@@ -322,6 +398,15 @@ def setup(cfg):
             util.FixedParameter(name="svnonly", default="True"),
         ],
     )
+    cfg['schedulers'][prefix+'-force-ara'] = schedulers.ForceScheduler(
+        name=prefix+"-force-ara",
+        builderNames=['cvmfs_builder_ara'],
+        properties=[
+            util.StringParameter(name="variant",
+                                 label="Version:",
+                                 default="trunk", size=80),
+        ],
+    )
 
     cfg['schedulers'][prefix+'-nightly'] = schedulers.Nightly(
         name=prefix+'-nightly',
@@ -333,7 +418,7 @@ def setup(cfg):
     cfg['schedulers'][prefix+'-nightly-spack'] = schedulers.Nightly(
         name=prefix+'-nightly-spack',
         builderNames=['svn_builder_spack'],
-        properties={'variant':'py3-v4.1.0-metaproject', 'svnonly': True, 'nightly':True},
+        properties={'variant':'py3-v4.1.1-metaproject', 'svnonly': True, 'nightly':True},
         hour=3, minute=0,
     )
 

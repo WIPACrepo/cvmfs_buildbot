@@ -101,7 +101,7 @@ def setup(cfg):
     build_factory = util.BuildFactory()
     build_factory.addStep(steps.ShellCommand(
         name='copy tables',
-        command=['wget','-nH','--cut-dirs','6','-P','retro','-np','-nc','-r','-l','4','-A','*.npy','http://icecube:skua@convey.icecube.wisc.edu/data/ana/reconstruction/2019/retro/tables/'],
+        command=['wget','-nH','--cut-dirs','6','-P','retro','-np','-nc','-r','-l','4','-A','*.npy','https://icecube:skua@convey.icecube.wisc.edu/data/ana/reconstruction/2019/retro/tables/'],
         workdir='/cvmfs/icecube.opensciencegrid.org/data/photon-tables/',
         haltOnFailure=True,
         locks=[

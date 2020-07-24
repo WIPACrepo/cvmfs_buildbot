@@ -118,10 +118,70 @@ def setup(cfg):
         collapseRequests=True,
     )
     
+    # ARA publish
+    factory = util.BuildFactory()
+    factory.addStep(steps.ShellCommand(
+        name='open transaction',
+        command=['cvmfs_server','transaction','ara.opensciencegrid.org'],
+        haltOnFailure=True,
+    ))
+    @util.renderer
+    def makeCommandRsyncARA(props):
+        src_path = os.path.join('ara.opensciencegrid.org',
+                                str(props.getProperty('path')))
+        dest_path = os.path.dirname(src_path)
+        command = [
+            'cvmfs_rsync','-ai','--delete',
+            os.path.join('/cvmfs-source',src_path),
+            os.path.join('/cvmfs',dest_path)+'/',
+        ]
+        return command
+    factory.addStep(steps.ShellCommand(
+        name='rsync',
+        command=makeCommandRsyncARA,
+        timeout=7200, # 2 hours
+        haltOnFailure=True,
+        doStepIf=BuildPassed,
+    ))
+    factory.addStep(steps.ShellCommand(
+        name='publish transaction',
+        command=['cvmfs_server','publish','ara.opensciencegrid.org'],
+        timeout=7200, # 2 hours
+        haltOnFailure=True,
+        doStepIf=BuildPassed,
+        hideStepIf=lambda results, s: results==SKIPPED,
+    ))
+    factory.addStep(steps.ShellCommand(
+        name='abort transaction',
+        command=['cvmfs_server','abort','-f','ara.opensciencegrid.org'],
+        alwaysRun=True,
+        haltOnFailure=True,
+        doStepIf=BuildFailed,
+        hideStepIf=lambda results, s: results==SKIPPED,
+    ))
+
+    cfg['builders'][prefix+'_ara_builder'] = util.BuilderConfig(
+        name=prefix+'_ara_builder',
+        workername=workername,
+        factory=factory,
+        properties={},
+        locks=[
+            cfg.locks['cvmfs_shared'].access('exclusive'),
+            cfg.locks['cvmfs_publish'].access('exclusive')
+        ],
+        collapseRequests=True,
+    )
+
+    # download whitelists
     factory_whitelist = util.BuildFactory()
     factory_whitelist.addStep(steps.ShellCommand(
-        name='resign whitelist',
+        name='resign IceCube whitelist',
         command='cd /srv/cvmfs/icecube.opensciencegrid.org && rm -f .cvmfswhitelist.new && wget -qO .cvmfswhitelist.new http://oasis.opensciencegrid.org/cvmfs/icecube.opensciencegrid.org/.cvmfswhitelist && mv -f .cvmfswhitelist.new .cvmfswhitelist',
+        haltOnFailure=True,
+    ))
+    factory_whitelist.addStep(steps.ShellCommand(
+        name='resign ARA whitelist',
+        command='cd /srv/cvmfs/ara.opensciencegrid.org && rm -f .cvmfswhitelist.new && wget -qO .cvmfswhitelist.new http://oasis.opensciencegrid.org/cvmfs/ara.opensciencegrid.org/.cvmfswhitelist && mv -f .cvmfswhitelist.new .cvmfswhitelist',
         haltOnFailure=True,
     ))
 
@@ -135,7 +195,8 @@ def setup(cfg):
         ],
         collapseRequests=True,
     )
-    
+
+    # user cvmfs
     factory_user_rsync = util.BuildFactory()
     factory_user_rsync.addStep(steps.ShellCommand(
         name='open transaction',
@@ -181,6 +242,7 @@ def setup(cfg):
         collapseRequests=True,
     )
 
+    # backup of IceCube
     factory_backup = util.BuildFactory()
     factory_backup.addStep(steps.ShellCommand(
         name='rsync',
@@ -214,6 +276,19 @@ def setup(cfg):
     cfg['schedulers']['publish-trigger'] = schedulers.Triggerable(
         name="publish-trigger",
         builderNames=[prefix+'_builder'],
+    )
+    cfg['schedulers']['publish-ara-force'] = schedulers.ForceScheduler(
+        name="publish-ara-force",
+        builderNames=[prefix+'_ara_builder'],
+        properties=[
+            util.StringParameter(name="path",
+                                 label="Path:",
+                                 default="", size=80),
+        ],
+    )
+    cfg['schedulers']['publish-ara-trigger'] = schedulers.Triggerable(
+        name="publish-ara-trigger",
+        builderNames=[prefix+'_ara_builder'],
     )
 
     # update the whitelist every day at 3am
