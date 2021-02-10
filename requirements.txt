@@ -24,6 +24,6 @@ SQLAlchemy==1.1.9
 sqlalchemy-migrate==0.11.0
 sqlparse==0.2.3
 Tempita==0.5.2
-Twisted==17.1.0
+Twisted==20.3.0
 txaio==2.6.2
 zope.interface==4.3.3
