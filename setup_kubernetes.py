@@ -40,7 +40,7 @@ def make_master_cfg():
     config = {
         'master.cfg': open('master.cfg').read()
     }
-    with open(config_path,'wb') as f:
+    with open(config_path,'w') as f:
         json.dump({
             'apiVersion':'v1',
             'kind':'ConfigMap',
@@ -57,7 +57,7 @@ def make_master_cfg():
             continue
         name = os.path.join('master_cfg_d',c)
         config[c] = open(name).read()
-    with open(config_path,'wb') as f:
+    with open(config_path,'w') as f:
         json.dump({
             'apiVersion':'v1',
             'kind':'ConfigMap',
@@ -109,7 +109,7 @@ def make_docker(name, push=False):
             subprocess.check_call(build_cmd, cwd=docker_path)
             for img in push_cmd:
                 subprocess.check_call(['docker','push',img], cwd=docker_path)
-        except Exception,KeyboardInterrupt:
+        except (Exception,KeyboardInterrupt) as e:
             out = subprocess.check_output(['docker','images',
                     '--filter','label=organization=icecube-buildbot',
                     '--filter','label=name='+name,
@@ -123,7 +123,7 @@ def make_docker(name, push=False):
 
 def make_workers():
     for name in os.listdir('docker_images'):
-        if not name.startswith('worker'):
+        if '14-04' in name or not name.startswith('worker'):
             continue
 
         # make docker image
@@ -208,7 +208,7 @@ def make_workers():
                             'volumes': [{
                                 'name': 'cvmfs-buildbot-worker-shared-storage',
                                 'cephfs':{
-                                    'monitors': ['10.128.11.206','10.128.11.207','10.128.11.208','10.128.11.209','10.128.11.210'],
+                                    'monitors': ['ceph.icecube.wisc.edu'],
                                     'path': '/k8s/buildbot-worker/cvmfs-buildbot-worker-shared-storage',
                                     'user': 'k8s',
                                     'secretRef': {
@@ -307,7 +307,7 @@ def main():
 
     make_secrets()
     make_master_cfg()
-    make_docker('master-cvmfs',push=args.push)
+    #make_docker('master-cvmfs',push=args.push)
     make_workers()
 
 if __name__ == '__main__':

@@ -52,7 +52,7 @@
                                 }
                             }
                         ],
-                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-stratum0:0.1.29",
+                        "image": "localhost:5000/icecube-buildbot-worker-cvmfs-centos7-stratum0:0.1.30",
                         "imagePullPolicy": "Always",
                         "name": "worker-cvmfs-centos7-stratum0",
                         "ports": [
@@ -109,11 +109,7 @@
                     {
                         "cephfs": {
                             "monitors": [
-                                "10.128.11.206",
-                                "10.128.11.207",
-                                "10.128.11.208",
-                                "10.128.11.209",
-                                "10.128.11.210"
+                                "ceph.icecube.wisc.edu"
                             ],
                             "path": "/k8s/buildbot-worker/cvmfs-buildbot-worker-shared-storage",
                             "secretRef": {
